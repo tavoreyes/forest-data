@@ -114,24 +114,37 @@ Archivos operativos:
 - `.claude/memory/learned-rules.md`: aprendizajes reutilizables.
 - `.claude/memory/sessions.jsonl`: historial compacto de sesiones.
 
-## Primer objetivo tecnico
 
-Convertir la maqueta actual en una aplicacion minima con:
+## Tareas pendientes y plan de acción
 
-- Estructura de proyecto limpia.
-- Datos derivados desde una fuente unica.
-- Registro real de arboles.
-- Captura de geolocalizacion.
-- Base de datos.
-- Panel publico basico.
-- Panel privado con autenticacion.
+Este listado se actualiza para dar seguimiento al avance del proyecto, conforme a la documentación y roadmap.
 
-## Licencia y gobernanza
+### Fase 0-1: Objetivos inmediatos
 
-Antes de publicar datos reales, el equipo debe definir:
+1. **Refactorizar la maqueta estática**
+	- Separar el CSS y JavaScript en archivos propios (`style.css`, `script.js`).
+	- Eliminar código duplicado y referencias inexistentes.
+	- Marcar funciones simuladas y dejar claro qué partes son mock.
 
-- Quien administra la informacion.
-- Quien puede capturar y editar registros.
-- Como se protegen fotografias, ubicaciones y datos de alumnos.
-- Que datos seran publicos y cuales quedaran privados.
-- Politica de uso de imagenes y consentimiento.
+2. **Documentar el uso y despliegue**
+	- Actualizar el `README.md` con instrucciones claras para abrir la maqueta localmente.
+	- Incluir capturas de pantalla y pasos para contribuir.
+
+3. **Definir el stack técnico inicial**
+	- Especificar tecnologías para frontend, backend, base de datos y almacenamiento de fotos.
+	- Documentar la decisión en `docs/03-arquitectura-tecnica.md`.
+
+4. **Preparar la estructura para el MVP**
+	- Crear carpetas/ficheros base para backend y base de datos (aunque sean placeholders).
+	- Esquematizar el modelo de datos en `docs/04-modelo-datos.md`.
+
+5. **Mejorar la presentación Marp**
+	- Reemplazar placeholders por imágenes o diagramas reales.
+	- Asegurar que la presentación refleje el estado y visión actual.
+
+6. **Primer commit estructural**
+	- Versionar todos los cambios y documentar en el changelog o en el commit.
+
+---
+
+Este checklist debe revisarse y actualizarse en cada sesión de trabajo para mantener trazabilidad y claridad de avance.
