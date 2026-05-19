@@ -1,0 +1,38 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python (futuro)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Marp exports
+presentations/*.html
+presentations/*.pdf
+presentations/*.pptx
+
+# Logs
+*.log
