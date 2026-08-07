@@ -2,7 +2,7 @@
 
 ## Estado actual (2026-08-07)
 
-Fase 0 completada. Fase 1 completada. Fase 2 en progreso (UI/UX mejorada, PWA básica).
+Fase 0 completada. Fase 1 completada. Fase 2 en progreso (85%). Fase 4 parcial (60%).
 
 ### Stack definido
 
@@ -13,10 +13,11 @@ Fase 0 completada. Fase 1 completada. Fase 2 en progreso (UI/UX mejorada, PWA b�
 | Package manager | npm |
 | Mapas | Leaflet + react-leaflet |
 | Estilos | CSS vanilla (tokens + componentes propios) |
-| Auth | Sin auth en Fase 1 |
+| Auth | Sin auth en Fase 1-2 |
 | IA | OpenRouter (Gemma 4) + Pl@ntNet |
 | Almacenamiento | Cloudflare R2 |
 | Medicion | OpenCV + ArUco markers |
+| Iconografia | lucide-react (sin emojis) |
 
 ### Codigo fuente (30 archivos)
 
@@ -37,10 +38,12 @@ Avenida Vasco de Quiroga, Capula, Morelia, Michoacán
 
 ### Decisiones cerradas
 
-- DEC-001 a DEC-010: Ver roadmap
-- DEC-011: UI/UX captura con dropdowns (no inputs manuales)
-- DEC-012: PWA básica (manifest + service worker)
-- DEC-013: Sidebar colapsable en móvil
+- DEC-001 a DEC-004: Ver `.claude/memory/DECISIONS.md`
+- DEC-005: UI/UX captura con dropdowns (no inputs manuales)
+- DEC-006: PWA basica (manifest + service worker)
+- DEC-007: Sidebar colapsable en movil
+- DEC-008: Iconografia Lucide (sin emojis en codigo fuente)
+- DEC-009: Prueba ArUco impresa pospuesta (sin impresora, conexion movil con uso medido)
 
 ### Estado de fases
 
@@ -48,22 +51,28 @@ Avenida Vasco de Quiroga, Capula, Morelia, Michoacán
 |------|--------|----------|
 | Fase 0 | Completada | 100% |
 | Fase 1 | Completada | 100% |
-| Fase 2 | En progreso | 75% |
+| Fase 2 | En progreso | 85% |
 | Fase 3 | No iniciada | 0% |
 | Fase 4 | Parcial | 60% |
 | Fase 5 | No iniciada | 0% |
 
+### Restricciones conocidas
+
+- Sin autenticacion: cualquier usuario puede crear/editar arboles
+- SQLite local: no soporta multiples usuarios concurrentes
+- Medicion ArUco: pendiente prueba con regla impresa (sin impresora)
+- Conexion movil: pruebas con datos compartidos (uso medido)
+
 ### Pendiente proxima sesion
 
-1. Probar `/capturar` en teléfono real
-2. Probar subida a R2 con credenciales reales
-3. Generar íconos PWA (192x192, 512x512)
-4. Completar PWA: offline mode, install prompt
-5. Probar medición ArUco con regla impresa
-6. Integrar Gemma VLM como fallback
-7. Fase 3: QR por árbol
-8. Fase 5: Exportación CSV
+1. Generar iconos PWA (192x192, 512x512)
+2. Completar PWA: offline mode, install prompt
+3. Probar captura en telefono real (conexion de uso medido)
+4. Probar subida a R2 con credenciales reales
+5. Integrar Gemma VLM como fallback
+6. Fase 3: QR por arbol
+7. Fase 5: Exportacion CSV
 
 ## Proximo paso
 
-Probar captura en teléfono + completar PWA.
+Completar PWA (iconos + offline) y probar captura en telefono.

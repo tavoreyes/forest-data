@@ -1,75 +1,103 @@
 # ForestData
 
-ForestData es una propuesta de plataforma educativa y ambiental para registrar, geolocalizar y dar seguimiento publico al crecimiento de arboles existentes y nuevos arboles plantados por alumnos.
-
-El objetivo no es solo tener un tablero bonito. La aspiracion es construir un sistema verificable de monitoreo forestal escolar: cada arbol debe tener ubicacion, historial de cuidados, evidencia fotografica, mediciones periodicas, responsable academico y una ficha publica que permita a la comunidad ver el avance del programa.
+ForestData es una plataforma educativa y ambiental para registrar, geolocalizar y dar seguimiento publico al crecimiento de arboles cuidados por alumnos en el CECyTEM 33 Capula, Michoacan.
 
 ## Estado actual
 
-Este repositorio contiene actualmente una maqueta estatica:
+Sistema funcional en desarrollo activo (Fase 2 en progreso). No es una maqueta estatica.
 
-- `forestdata-dash.html`: prototipo visual de panel administrativo con mapa, listado de arboles, detalle individual, registro de cuidado, grafica de crecimiento y simulacion de modulo de IA.
+### Funcionalidades implementadas
 
-La maqueta ayuda a visualizar la direccion del producto, pero todavia no es un sistema funcional. No tiene backend, base de datos, autenticacion, app movil, carga real de fotos, geolocalizacion real, generacion real de QR, integracion real con IA ni persistencia.
+- **Mapa interactivo** con Leaflet y 10 arboles reales geolocalizados en CECyTEM 33
+- **CRUD completo** de arboles (crear, editar, eliminar, consultar)
+- **Panel de administracion** con estadisticas y acciones
+- **Captura movil** optimizada con selects/dropdowns, GPS automatico y busqueda
+- **Subida de fotos** a Cloudflare R2 con metadatos sanitizados
+- **Identificacion de especies** via Pl@ntNet API
+- **Medicion de altura** con ArUco markers (scripts Python, pendiente prueba con regla impresa)
+- **PWA basica** con manifest.json y service worker
+- **Iconografia Lucide** (sin emojis en el codigo fuente)
 
-## Vision
+### Stack tecnico
 
-ForestData debe permitir que:
+| Capa | Tecnologia |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Frontend | React 18 + Leaflet |
+| Base de datos | SQLite via better-sqlite3 |
+| Estilos | CSS vanilla (tokens de diseño propios) |
+| IA | Pl@ntNet (especies) + OpenRouter/Gemma 4 (validacion) |
+| Almacenamiento fotos | Cloudflare R2 (10GB gratis) |
+| Medicion altura | OpenCV + ArUco DICT_5X5_50 |
+| Iconografia | lucide-react |
+| Package manager | npm |
 
-- Los alumnos registren arboles desde su telefono movil usando GPS.
-- Cada arbol tenga una ficha unica con QR.
-- La comunidad vea un mapa publico con los arboles, su estado general y su avance.
-- Los administradores validen registros, corrijan datos, asignen responsables y generen reportes.
-- Un modulo de IA ayude a identificar la planta, estimar crecimiento con evidencia fotografica y detectar posibles alertas.
-- El proyecto sea pedagogico: que los alumnos aprendan captura de datos, geografia, biologia, estadistica, tecnologia e inteligencia artificial aplicada.
+### Estructura del proyecto
 
-## Interfaces previstas
+```
+src/
+  app/           # Next.js App Router (pages + API routes)
+  components/    # React components (Map, TreeCapture, DetailMap)
+  lib/           # Database schema + utilities
+public/          # PWA manifest, service worker, assets
+scripts/         # Python scripts (ArUco measurement)
+docs/            # Documentacion del proyecto
+.claude/memory/  # Decisiones, reglas aprendidas, historial
+```
 
-### Interfaz publica
+## Como ejecutar
 
-Vista abierta para comunidad escolar, padres, docentes, autoridades y visitantes.
+```bash
+# Instalar dependencias
+npm install
 
-Debe mostrar:
+# Ejecutar en desarrollo
+npm run dev
 
-- Mapa de arboles registrados.
-- Ficha publica por arbol.
-- Especie, zona, fecha de plantacion y estado general.
-- Fotografias historicas aprobadas.
-- Grafica de crecimiento.
-- Indicadores agregados del programa.
-- Historias o avances del proyecto.
+# Abrir en navegador
+# http://localhost:3000
+```
 
-No debe exponer datos personales sensibles de alumnos.
+Requiere Node.js 18+ y Python 3.11+ (para medicion ArUco).
 
-### Interfaz privada
+## Funcionalidades pendientes
 
-Vista para administradores, docentes o coordinadores.
+### Fase 2 (en progreso)
 
-Debe permitir:
+- Generar iconos PWA (192x192, 512x512)
+- Modo offline con cola de capturas pendientes
+- Prompt de instalacion PWA
+- Validacion de GPS (que este dentro del campus)
+- Validacion de fotos (tamano, formato)
 
-- Validar o rechazar registros enviados por alumnos.
-- Administrar arboles, zonas, especies, usuarios y grupos.
-- Revisar evidencias fotograficas.
-- Consultar alertas de salud o falta de seguimiento.
-- Exportar datos.
-- Gestionar codigos QR.
-- Auditar cambios.
+### Fase 3 (no iniciada)
 
-### App movil para alumnos
+- QR unico por arbol
+- Ficha publica mejorada con grafica de crecimiento
+- Historial fotografico aprobado
 
-Debe permitir:
+### Fase 4 (parcial)
 
-- Capturar geolocalizacion GPS.
-- Registrar arboles nuevos.
-- Actualizar cuidados de arboles existentes.
-- Tomar o subir fotografias.
-- Escanear QR de un arbol.
-- Registrar agua, observaciones y estado visible.
-- Trabajar con conectividad limitada cuando sea posible.
+- Prueba de medicion ArUco con marcadores reales (pendiente: impresion de regla)
+- Integracion Gemma 4 VLM como fallback/validacion
+- Deteccion de alertas visuales
+
+### Fase 5 (no iniciada)
+
+- Exportacion CSV/XLSX
+- Reportes por zona, especie y grupo
+- Dashboard publico de impacto
+
+## Restricciones conocidas
+
+- **Sin autenticacion**: cualquier usuario puede crear/editar arboles (Fase 2)
+- **SQLite local**: no soporta multiples usuarios concurrentes (aceptable para MVP)
+- **Medicion ArUco**: pendiente prueba con regla impresa (sin acceso a impresora)
+- **Conexion movil**: las pruebas en telefono se realizan con conexion de uso medido (compartiendo datos)
 
 ## Documentacion
 
-La documentacion base esta en `docs/`:
+La documentacion completa esta en `docs/`:
 
 - [Vision del producto](docs/01-vision-producto.md)
 - [Alcance funcional](docs/02-alcance-funcional.md)
@@ -83,12 +111,6 @@ La documentacion base esta en `docs/`:
 - [API inicial propuesta](docs/10-api-inicial.md)
 - [Backlog tecnico priorizado](docs/11-backlog-tecnico.md)
 - [Metodologia de desarrollo](docs/12-metodologia-desarrollo.md)
-
-## Presentacion
-
-La presentacion general del proyecto esta en `presentations/forestdata-presentacion.marp.md`. Esta escrita en formato Marp, con 13 diapositivas: una vision general y una diapositiva por cada documento base.
-
-La guia para exportar y reemplazar placeholders de imagen esta en `presentations/README.md`.
 
 ## Principios del desarrollo
 
@@ -104,8 +126,6 @@ La guia para exportar y reemplazar placeholders de imagen esta en `presentations
 
 ForestData usa Project Bootstrap + Persistent Context + Session Efficiency como base permanente de trabajo. Esto mantiene una memoria minima del proyecto, reduce relecturas innecesarias y evita perder decisiones entre sesiones.
 
-SDD + Plan First se activa cuando una tarea toca arquitectura, stack, base de datos, API, autenticacion, permisos, privacidad, fotos, GPS, IA, despliegue o mas de 3 archivos.
-
 Archivos operativos:
 
 - `CLAUDE.md`: reglas de trabajo para agentes.
@@ -113,38 +133,3 @@ Archivos operativos:
 - `.claude/memory/DECISIONS.md`: decisiones cerradas.
 - `.claude/memory/learned-rules.md`: aprendizajes reutilizables.
 - `.claude/memory/sessions.jsonl`: historial compacto de sesiones.
-
-
-## Tareas pendientes y plan de acción
-
-Este listado se actualiza para dar seguimiento al avance del proyecto, conforme a la documentación y roadmap.
-
-### Fase 0-1: Objetivos inmediatos
-
-1. **Refactorizar la maqueta estática**
-	- Separar el CSS y JavaScript en archivos propios (`style.css`, `script.js`).
-	- Eliminar código duplicado y referencias inexistentes.
-	- Marcar funciones simuladas y dejar claro qué partes son mock.
-
-2. **Documentar el uso y despliegue**
-	- Actualizar el `README.md` con instrucciones claras para abrir la maqueta localmente.
-	- Incluir capturas de pantalla y pasos para contribuir.
-
-3. **Definir el stack técnico inicial**
-	- Especificar tecnologías para frontend, backend, base de datos y almacenamiento de fotos.
-	- Documentar la decisión en `docs/03-arquitectura-tecnica.md`.
-
-4. **Preparar la estructura para el MVP**
-	- Crear carpetas/ficheros base para backend y base de datos (aunque sean placeholders).
-	- Esquematizar el modelo de datos en `docs/04-modelo-datos.md`.
-
-5. **Mejorar la presentación Marp**
-	- Reemplazar placeholders por imágenes o diagramas reales.
-	- Asegurar que la presentación refleje el estado y visión actual.
-
-6. **Primer commit estructural**
-	- Versionar todos los cambios y documentar en el changelog o en el commit.
-
----
-
-Este checklist debe revisarse y actualizarse en cada sesión de trabajo para mantener trazabilidad y claridad de avance.
