@@ -78,6 +78,7 @@ function saveCheckpoint(summary, contextoMd, nextStep) {
 }
 
 function loadLatestCheckpoint() {
+  ensureCheckpointDir();
   const files = fs.readdirSync(CHECKPOINT_DIR)
     .filter(f => f.startsWith('checkpoint-') && f.endsWith('.json'))
     .sort()
@@ -170,17 +171,57 @@ switch (comando) {
   case '--list':
     listCheckpoints();
     break;
+  case 'boot':
+    const cp = loadLatestCheckpoint();
+    if (cp) {
+      console.log(generateResumePrompt(cp));
+    } else {
+      console.log('No hay checkpoint previo. Iniciando sesión fresca.');
+      console.log('---');
+      const contextoMd = fs.readFileSync(path.join(PROJECT_ROOT, 'CONTEXTO.md'), 'utf-8');
+      console.log('CONTEXTO ACTUAL:');
+      console.log(contextoMd.slice(0, 2000));
+    }
+    break;
+  case 'close': {
+    const contextoMd = fs.readFileSync(path.join(PROJECT_ROOT, 'CONTEXTO.md'), 'utf-8');
+    const nextStep = args.slice(1).join(' ') || 'Continuar tarea actual';
+    // close siempre guarda checkpoint (force)
+    const sessionFile = getSessionFile();
+    let messages = [];
+    if (fs.existsSync(sessionFile)) {
+      const content = fs.readFileSync(sessionFile, 'utf-8').trim();
+      if (content) {
+        messages = content.split('\n')
+          .map(line => { try { const parsed = JSON.parse(line); return parsed && parsed.content ? parsed : null; } catch { return null; } })
+          .filter(Boolean);
+      }
+    }
+    const config = loadConfig();
+    const summary = createDenseSummary(messages, config.checkpointProtocol?.summaryMaxTokens || 500);
+    const checkpointFile = saveCheckpoint(summary, contextoMd, nextStep);
+    const resumePrompt = generateResumePrompt({ summary, contextoMd, nextStep });
+    
+    console.log(`[CHECKPOINT] Guardado en: ${checkpointFile}`);
+    console.log('\n--- PROMPT DE RESUMEN PARA NUEVA SESIÓN ---\n');
+    console.log(resumePrompt);
+    console.log('\n--- FIN PROMPT ---\n');
+    break;
+  }
   default:
     console.log(`
 Uso: node .claude/scripts/checkpoint.js [comando]
 
 Comandos:
-  --trigger [siguiente_paso]  Verifica y crea checkpoint si aplica
-  --resume                    Genera prompt de reanudación del último checkpoint
-  --list                      Lista todos los checkpoints guardados
+  boot                      Inicia sesión: muestra resumen previo + CONTEXTO.md
+  close [próximo_paso]      Cierra sesión: guarda checkpoint + actualiza próximo paso
+  --trigger [siguiente_paso] Verifica y crea checkpoint si aplica (auto @15 msgs)
+  --resume                  Genera prompt de reanudación del último checkpoint
+  --list                    Lista todos los checkpoints guardados
 
 Integración recomendada:
-  - Añadir al final de cada respuesta del agente: "node .claude/scripts/checkpoint.js --trigger 'próximo paso'"
-  - Al iniciar sesión: "node .claude/scripts/checkpoint.js --resume"
+  - Al iniciar sesión: boot
+  - Al cerrar sesión: close "próximo paso"
+  - Durante sesión: auto-checkpoint cada 15 mensajes
 `);
 }

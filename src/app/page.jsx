@@ -32,9 +32,10 @@ export default function HomePage() {
           </div>
         </div>
         <nav style={{ display: 'flex', gap: 8 }}>
+          <Link href="/capturar" className="btn btn-primary">📸 Capturar</Link>
           <Link href="/arboles" className="btn btn-ghost">📋 Arboles</Link>
           <Link href="/admin" className="btn btn-ghost">⚙️ Admin</Link>
-          <Link href="/arboles/nuevo" className="btn btn-primary">+ Registrar</Link>
+          <Link href="/arboles/nuevo" className="btn btn-ghost">+ Registrar</Link>
         </nav>
       </header>
 

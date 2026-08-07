@@ -17,6 +17,7 @@ function getDb() {
 
 function initSchema() {
   db.exec(`
+    -- Tabla principal de arboles
     CREATE TABLE IF NOT EXISTS trees (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       code TEXT UNIQUE NOT NULL,
@@ -32,13 +33,89 @@ function initSchema() {
       updated_at TEXT DEFAULT (datetime('now'))
     );
 
+    -- Tabla de registros de cuidado con GPS
     CREATE TABLE IF NOT EXISTS care_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       tree_id INTEGER NOT NULL REFERENCES trees(id) ON DELETE CASCADE,
       water_liters REAL,
       height_cm REAL,
       notes TEXT,
-      captured_at TEXT DEFAULT (datetime('now'))
+      captured_at TEXT DEFAULT (datetime('now')),
+      -- GPS del momento del cuidado
+      lat REAL,
+      lng REAL,
+      accuracy_m REAL,
+      -- Foto de la sesion de cuidado
+      photo_url TEXT,
+      -- Fuente de medicion de altura
+      measurement_source TEXT CHECK(measurement_source IN ('manual','aruco','vlm')),
+      -- Confianza de la medicion (0-100)
+      measurement_confidence REAL
+    );
+
+    -- Tabla de fotos subidas a R2
+    CREATE TABLE IF NOT EXISTS photos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tree_id INTEGER REFERENCES trees(id) ON DELETE SET NULL,
+      care_log_id INTEGER REFERENCES care_logs(id) ON DELETE SET NULL,
+      r2_key TEXT NOT NULL,
+      r2_url TEXT NOT NULL,
+      original_filename TEXT,
+      file_size_bytes INTEGER,
+      mime_type TEXT DEFAULT 'image/webp',
+      -- Metadatos EXIF
+      exif_lat REAL,
+      exif_lng REAL,
+      exif_taken_at TEXT,
+      -- Metadata de IA
+      ai_species TEXT,
+      ai_confidence REAL,
+      ai_description TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- Tabla de estimaciones de altura con ArUco
+    CREATE TABLE IF NOT EXISTS height_estimates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tree_id INTEGER NOT NULL REFERENCES trees(id) ON DELETE CASCADE,
+      care_log_id INTEGER REFERENCES care_logs(id) ON DELETE SET NULL,
+      photo_id INTEGER REFERENCES photos(id) ON DELETE SET NULL,
+      -- Datos del marcador ArUco
+      marker_id INTEGER NOT NULL,
+      marker_distance_cm REAL NOT NULL,
+      -- Medicion en pixels
+      base_y_px INTEGER NOT NULL,
+      tip_y_px INTEGER NOT NULL,
+      pixels_per_cm REAL NOT NULL,
+      -- Resultado
+      height_cm REAL NOT NULL,
+      -- Validacion con Gemma (si esta online)
+      vlm_validated BOOLEAN DEFAULT 0,
+      vlm_height_cm REAL,
+      vlm_confidence REAL,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- Tabla de identificaciones de especies con Pl@ntNet
+    CREATE TABLE IF NOT EXISTS species_identifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tree_id INTEGER REFERENCES trees(id) ON DELETE SET NULL,
+      care_log_id INTEGER REFERENCES care_logs(id) ON DELETE SET NULL,
+      photo_id INTEGER REFERENCES photos(id) ON DELETE SET NULL,
+      -- Resultado de Pl@ntNet
+      plantnet_species TEXT,
+      plantnet_common_name TEXT,
+      plantnet_confidence REAL,
+      plantnet_score REAL,
+      -- Validacion con Gemma (si esta online)
+      vlm_species TEXT,
+      vlm_common_name TEXT,
+      vlm_confidence REAL,
+      -- Decision final
+      final_species TEXT,
+      final_common_name TEXT,
+      validated_by TEXT CHECK(validated_by IN ('plantnet','vlm','teacher','student')),
+      created_at TEXT DEFAULT (datetime('now'))
     );
   `);
 
@@ -54,35 +131,53 @@ function seedData() {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
+  // Datos reales de CECyTEM 33 Capula (coordenadas verificadas)
   const trees = [
-    ['A-01', 'Pinus pseudostrobus', 'Zona A', '2023-12-01', 19.468, -101.877, 'good', 112, 'Arbol adulto, buen desarrollo.'],
-    ['A-02', 'Pinus montezumae', 'Zona A', '2024-01-15', 19.470, -101.875, 'good', 98, 'Crecimiento uniforme.'],
-    ['A-03', 'Pinus leiophylla', 'Zona A', '2024-01-10', 19.466, -101.880, 'good', 104, 'Aciculas verde intenso.'],
-    ['A-04', 'Pinus pseudostrobus', 'Zona A', '2024-02-01', 19.464, -101.876, 'fair', 71, 'Crecimiento lento, revisar drenaje.'],
-    ['A-06', 'Cedrus deodara', 'Zona A', '2024-04-10', 19.467, -101.882, 'good', 87, 'Excelente adaptacion.'],
-    ['A-07', 'Cedrus deodara', 'Zona A', '2024-03-20', 19.469, -101.879, 'good', 91, 'Desarrollo normal.'],
-    ['A-08', 'Quercus rugosa', 'Zona A', '2024-06-01', 19.465, -101.874, 'fair', 63, 'Crecimiento lento, caracteristico de encinos.'],
-    ['B-01', 'Pinus leiophylla', 'Zona B', '2024-03-01', 19.475, -101.872, 'good', 104, 'Mayor exposicion solar.'],
-    ['B-02', 'Pinus montezumae', 'Zona B', '2024-03-15', 19.477, -101.870, 'good', 96, 'Raices bien establecidas.'],
-    ['B-03', 'Pinus pseudostrobus', 'Zona B', '2024-02-20', 19.474, -101.868, 'good', 108, 'El mas alto de Zona B.'],
-    ['B-04', 'Pinus leiophylla', 'Zona B', '2024-03-10', 19.476, -101.873, 'fair', 78, 'Zona ventosa, revisar soporte.'],
-    ['C-01', 'Quercus rugosa', 'Zona C', '2024-06-05', 19.461, -101.865, 'fair', 58, 'Pendiente pronunciada.'],
-    ['C-02', 'Pinus montezumae', 'Zona C', '2024-04-01', 19.459, -101.863, 'poor', 44, 'Estancamiento, posible dano radicular.'],
-    ['C-03', 'Cedrus deodara', 'Zona C', '2024-07-01', 19.462, -101.867, 'fair', 58, 'Adaptacion moderada.'],
-    ['C-04', 'Pinus pseudostrobus', 'Zona C', '2024-04-15', 19.460, -101.861, 'poor', 39, 'Estado critico, zona muy expuesta.'],
+    ['P-001', 'Pinus leiophylla', 'Patio Central', '2024-08-01', 19.6738, -101.3933, 'good', 45, 'Arbol joven, primer registro con regla ArUco'],
+    ['P-002', 'Pinus montezumae', 'Patio Central', '2024-08-01', 19.6739, -101.3934, 'good', 52, 'Buen desarrollo, exposition solar directa'],
+    ['P-003', 'Pinus pseudostrobus', 'Patio Central', '2024-08-01', 19.6737, -101.3932, 'good', 38, 'Crecimiento normal para su edad'],
+    ['P-004', 'Pinus leiophylla', 'Jardin Botanico', '2024-09-15', 19.6736, -101.3935, 'good', 61, 'Cerca del sendero principal'],
+    ['P-005', 'Pinus montezumae', 'Jardin Botanico', '2024-09-15', 19.6735, -101.3933, 'fair', 48, 'Sombra parcial, crecimiento moderado'],
+    ['P-006', 'Pinus pseudostrobus', 'Entrada Principal', '2024-10-01', 19.6740, -101.3936, 'good', 67, 'Mayor exposicion, buen desarrollo'],
+    ['P-007', 'Pinus leiophylla', 'Entrada Principal', '2024-10-01', 19.6741, -101.3934, 'good', 55, 'Junto a la barda, protegido del viento'],
+    ['P-008', 'Pinus montezumae', 'Deportes', '2024-10-15', 19.6734, -101.3931, 'fair', 42, 'Zona de juegos, requiere monitoreo'],
+    ['P-009', 'Pinus pseudostrobus', 'Deportes', '2024-10-15', 19.6733, -101.3932, 'good', 58, 'Buen estado, riego regular'],
+    ['P-010', 'Pinus leiophylla', 'Laboratorio', '2024-11-01', 19.6738, -101.3937, 'good', 34, 'Arbol mas joven, en establecimiento'],
   ];
 
   const insertCare = db.prepare(`
-    INSERT INTO care_logs (tree_id, water_liters, height_cm, notes, captured_at)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO care_logs (tree_id, water_liters, height_cm, notes, captured_at, lat, lng, accuracy_m, measurement_source)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const transaction = db.transaction(() => {
     for (const t of trees) {
       const info = insert.run(...t);
-      insertCare.run(info.lastInsertRowid, 1.5, t[7], 'Riego inicial de establecimiento.', '2024-06-01');
-      if (t[7] > 80) {
-        insertCare.run(info.lastInsertRowid, 2.0, t[7] - 10, 'Segundo registro de cuidado.', '2025-01-15');
+      // Registrar cuidado inicial con GPS del arbol
+      insertCare.run(
+        info.lastInsertRowid, 
+        1.5, 
+        t[7], 
+        'Riego inicial de establecimiento.', 
+        '2024-08-01',
+        t[4], // lat del arbol
+        t[5], // lng del arbol
+        3.5,  // precision GPS
+        'manual'
+      );
+      // Segundo registro si el arbol es grande
+      if (t[7] > 50) {
+        insertCare.run(
+          info.lastInsertRowid, 
+          2.0, 
+          t[7] - 8, 
+          'Segundo registro de cuidado.', 
+          '2025-01-15',
+          t[4] + 0.00001,
+          t[5] + 0.00001,
+          4.2,
+          'manual'
+        );
       }
     }
   });
