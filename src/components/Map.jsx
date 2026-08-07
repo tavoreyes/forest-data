@@ -58,7 +58,16 @@ export default function Map({ trees }) {
       const m = L.marker([t.lat, t.lng], { icon: makeIcon(t.health) }).addTo(map);
       m.bindPopup(`
         <div style="padding:12px 14px;min-width:190px;font-family:Inter,sans-serif;">
-          <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:2px;">🌲 ${t.species}</div>
+          <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:2px;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 22v-2"></path>
+              <path d="M9 18H4a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v10"></path>
+              <path d="M14 16v4"></path>
+              <path d="M7 8h10"></path>
+              <path d="M12 4v4"></path>
+            </svg>
+            ${t.species}
+          </div>
           <div style="font-size:11px;color:#9ca3af;margin-bottom:10px;">Arbol #${t.code} · ${t.zone}</div>
           <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
             <span style="font-size:10px;color:#9ca3af;">Altura</span>

@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { 
+  ArrowLeft, Plus, Search, TreePine, 
+  ChevronRight, Filter
+} from 'lucide-react';
 
 export default function ArbolesPage() {
   const router = useRouter();
@@ -26,7 +30,10 @@ export default function ArbolesPage() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <header className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link href="/" className="btn btn-ghost btn-sm">← Inicio</Link>
+          <Link href="/" className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <ArrowLeft size={14} />
+            Inicio
+          </Link>
           <h1>Arboles</h1>
           <span className="chip" style={{ background: 'var(--s3)', color: 'var(--t2)', border: '1px solid var(--border)' }}>
             {trees.length}
@@ -40,7 +47,10 @@ export default function ArbolesPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <Link href="/arboles/nuevo" className="btn btn-primary">+ Nuevo</Link>
+          <Link href="/arboles/nuevo" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Plus size={14} />
+            Nuevo
+          </Link>
         </div>
       </header>
 
@@ -100,7 +110,7 @@ export default function ArbolesPage() {
                     data-clickable
                     onClick={() => router.push(`/arboles/${t.id}`)}
                   >
-                    <td style={{ fontSize: 16 }}>🌲</td>
+                    <td style={{ fontSize: 16 }}><TreePine size={16} /></td>
                     <td style={{ fontWeight: 600, color: 'var(--t1)' }}>{t.species}</td>
                     <td style={{ color: 'var(--t3)', fontVariantNumeric: 'tabular-nums' }}>#{t.code}</td>
                     <td style={{ color: 'var(--t2)' }}>{t.zone}</td>
@@ -111,7 +121,7 @@ export default function ArbolesPage() {
                     <td style={{ color: 'var(--t3)' }}>
                       {t.updated_at ? new Date(t.updated_at).toLocaleDateString('es-MX') : '—'}
                     </td>
-                    <td style={{ color: 'var(--t3)', fontSize: 14 }}>→</td>
+                    <td style={{ color: 'var(--t3)', fontSize: 14 }}><ChevronRight size={14} /></td>
                   </tr>
                 ))}
                 {trees.length === 0 && (

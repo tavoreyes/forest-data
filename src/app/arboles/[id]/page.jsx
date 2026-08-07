@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { 
+  ArrowLeft, Edit2, Plus, Save, X, 
+  TreePine, Droplets, Ruler, Calendar, MapPin, AlertTriangle
+} from 'lucide-react';
 
 const DetailMap = dynamic(() => import('@/components/DetailMap'), { ssr: false });
 
@@ -88,7 +92,10 @@ export default function TreeDetailPage({ params }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <header className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link href="/arboles" className="btn btn-ghost btn-sm">← Volver</Link>
+          <Link href="/arboles" className="btn btn-ghost btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <ArrowLeft size={14} />
+            Volver
+          </Link>
           <h1 style={{ fontSize: 15 }}>{tree.species}</h1>
           <span style={{ fontSize: 12, color: 'var(--t3)', fontVariantNumeric: 'tabular-nums' }}>#{tree.code}</span>
           <span className={`chip ${tree.health}`}>● {healthLabel[tree.health]}</span>
@@ -97,14 +104,34 @@ export default function TreeDetailPage({ params }) {
           <button className="btn btn-ghost" onClick={() => {
             setShowEditForm(!showEditForm);
             setShowCareForm(false);
-          }}>
-            {showEditForm ? 'Cancelar' : '✏️ Editar'}
+          }} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {showEditForm ? (
+              <>
+                <X size={14} />
+                Cancelar
+              </>
+            ) : (
+              <>
+                <Edit2 size={14} />
+                Editar
+              </>
+            )}
           </button>
           <button className="btn btn-primary" onClick={() => {
             setShowCareForm(!showCareForm);
             setShowEditForm(false);
-          }}>
-            {showCareForm ? 'Cancelar' : '+ Registrar cuidado'}
+          }} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {showCareForm ? (
+              <>
+                <X size={14} />
+                Cancelar
+              </>
+            ) : (
+              <>
+                <Plus size={14} />
+                Registrar cuidado
+              </>
+            )}
           </button>
         </div>
       </header>

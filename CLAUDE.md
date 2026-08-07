@@ -65,3 +65,4 @@ Al cerrar una sesion de trabajo:
 - Los cambios importantes deben ser auditables.
 - Las decisiones cerradas no se reabren sin razon explicita.
 - Para tareas pequenas y claras, ejecutar directo; para tareas estructurales, especificar primero.
+- **No usar emojis en el codigo fuente.** Usar iconos Lucide React (`lucide-react`) para toda interfaz grafica.

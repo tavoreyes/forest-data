@@ -2,6 +2,11 @@
 
 import { useState, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
+import { 
+  Camera, ImagePlus, Search, ChevronDown, ChevronUp,
+  TreePine, MapPin, Droplets, Ruler, CheckCircle2,
+  ArrowLeft, Loader2, X, Plus, Leaf, Upload
+} from 'lucide-react';
 
 const SPECIES_OPTIONS = [
   'Pinus leiophylla',
@@ -337,7 +342,11 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     color: '#fff',
     cursor: 'pointer',
     fontSize: 14,
-    fontWeight: 600
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
   };
 
   const btnSecondary = {
@@ -348,7 +357,11 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     background: '#fff',
     cursor: 'pointer',
     fontSize: 14,
-    fontWeight: 500
+    fontWeight: 500,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
   };
 
   return (
@@ -361,9 +374,9 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
         <div style={{
           width: 40, height: 40, borderRadius: 12, background: 'var(--green)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontSize: 20
+          color: '#fff'
         }}>
-          📸
+          <Camera size={20} />
         </div>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: 18, fontWeight: 700 }}>Capturar Arbol</h1>
@@ -372,8 +385,10 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
         {gpsCoords && (
           <div style={{
             padding: '4px 8px', borderRadius: 6, fontSize: 10,
-            background: '#dcfce7', color: '#166534'
+            background: '#dcfce7', color: '#166534',
+            display: 'flex', alignItems: 'center', gap: 4
           }}>
+            <MapPin size={10} />
             GPS activo
           </div>
         )}
@@ -399,9 +414,11 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
                 flex: 1, padding: 10, borderRadius: 8, border: 'none',
                 background: !newTreeMode ? 'var(--green)' : 'var(--s2)',
                 color: !newTreeMode ? '#fff' : 'var(--t2)',
-                cursor: 'pointer', fontSize: 13, fontWeight: 600
+                cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
               }}
             >
+              <TreePine size={14} />
               Arbol existente
             </button>
             <button
@@ -410,10 +427,12 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
                 flex: 1, padding: 10, borderRadius: 8, border: 'none',
                 background: newTreeMode ? 'var(--green)' : 'var(--s2)',
                 color: newTreeMode ? '#fff' : 'var(--t2)',
-                cursor: 'pointer', fontSize: 13, fontWeight: 600
+                cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
               }}
             >
-              + Arbol nuevo
+              <Plus size={14} />
+              Arbol nuevo
             </button>
           </div>
 
@@ -430,12 +449,13 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
                     paddingLeft: 36
                   }}
                 />
-                <span style={{
-                  position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-                  fontSize: 14, color: 'var(--t3)'
-                }}>
-                  🔍
-                </span>
+                <Search 
+                  size={14} 
+                  style={{
+                    position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+                    color: 'var(--t3)'
+                  }} 
+                />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 400, overflowY: 'auto' }}>
@@ -453,7 +473,10 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
                       <div>
                         <div style={{ fontSize: 14, fontWeight: 600 }}>{tree.code}</div>
                         <div style={{ fontSize: 11, color: 'var(--t3)' }}>{tree.species}</div>
-                        <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 2 }}>{tree.zone}</div>
+                        <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <MapPin size={10} />
+                          {tree.zone}
+                        </div>
                       </div>
                       <div style={{
                         padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600,
@@ -565,8 +588,9 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
             </div>
             <button
               onClick={() => { setSelectedTree(null); setStep(1); }}
-              style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: '#fff', cursor: 'pointer', fontSize: 11 }}
+              style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: '#fff', cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}
             >
+              <X size={12} />
               Cambiar
             </button>
           </div>
@@ -586,7 +610,7 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
                 background: '#f0fdf4', cursor: 'pointer', textAlign: 'center'
               }}
             >
-              <div style={{ fontSize: 36, marginBottom: 8 }}>📷</div>
+              <Camera size={36} style={{ color: 'var(--green)', margin: '0 auto 8px' }} />
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--green)' }}>
                 Tomar Foto
               </div>
@@ -599,7 +623,8 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
               onClick={() => fileInputRef.current?.click()}
               style={btnSecondary}
             >
-              📁 Seleccionar de Galeria
+              <ImagePlus size={16} />
+              Seleccionar de Galeria
             </button>
           </div>
 
@@ -624,10 +649,12 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
             style={{
               marginTop: 16, padding: 12, borderRadius: 8, border: 'none',
               background: 'transparent', color: 'var(--t3)', cursor: 'pointer',
-              fontSize: 13, width: '100%'
+              fontSize: 13, width: '100%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
             }}
           >
-            ← Volver
+            <ArrowLeft size={14} />
+            Volver
           </button>
         </div>
       )}
@@ -651,8 +678,10 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
           {gpsCoords && (
             <div style={{
               padding: '8px 12px', borderRadius: 8, background: '#f0fdf4',
-              fontSize: 11, color: '#166534', marginBottom: 16
+              fontSize: 11, color: '#166534', marginBottom: 16,
+              display: 'flex', alignItems: 'center', gap: 6
             }}>
+              <MapPin size={12} />
               GPS: {gpsCoords.lat.toFixed(6)}, {gpsCoords.lng.toFixed(6)} ({gpsCoords.accuracy?.toFixed(1)}m)
             </div>
           )}
@@ -676,9 +705,11 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
               style={{
                 padding: '12px 20px', borderRadius: 10, border: 'none',
                 background: 'var(--green)', color: '#fff', cursor: 'pointer',
-                fontSize: 14, fontWeight: 600
+                fontSize: 14, fontWeight: 600,
+                display: 'flex', alignItems: 'center', gap: 6
               }}
             >
+              <Ruler size={16} />
               OK
             </button>
           </div>
@@ -688,6 +719,7 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
               onClick={() => { setPhoto(null); setPhotoPreview(null); setStep(2); }}
               style={{ ...btnSecondary, flex: 1 }}
             >
+              <ArrowLeft size={14} />
               Otra foto
             </button>
           </div>
@@ -701,7 +733,8 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
             padding: 14, borderRadius: 10, background: '#f0fdf4',
             border: '1px solid #bbf7d0', marginBottom: 16, textAlign: 'center'
           }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <Ruler size={24} />
               {measurement?.height_cm} cm
             </div>
             <div style={{ fontSize: 11, color: 'var(--t3)' }}>Altura registrada</div>
@@ -720,7 +753,17 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
               disabled={uploading}
               style={{ ...btnPrimary, opacity: uploading ? 0.7 : 1 }}
             >
-              {uploading ? 'Identificando...' : '🌿 Identificar con Pl@ntNet'}
+              {uploading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Identificando...
+                </>
+              ) : (
+                <>
+                  <Leaf size={16} />
+                  Identificar con Pl@ntNet
+                </>
+              )}
             </button>
 
             <button
@@ -752,30 +795,42 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
           }}>
             <div style={{
               padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
-              display: 'flex', justifyContent: 'space-between'
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
-              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Arbol</span>
+              <span style={{ fontSize: 12, color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <TreePine size={12} />
+                Arbol
+              </span>
               <span style={{ fontSize: 12, fontWeight: 600 }}>{selectedTree?.code}</span>
             </div>
             <div style={{
               padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
-              display: 'flex', justifyContent: 'space-between'
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
-              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Altura</span>
+              <span style={{ fontSize: 12, color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Ruler size={12} />
+                Altura
+              </span>
               <span style={{ fontSize: 12, fontWeight: 600 }}>{measurement?.height_cm} cm</span>
             </div>
             <div style={{
               padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
-              display: 'flex', justifyContent: 'space-between'
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
-              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Especie</span>
+              <span style={{ fontSize: 12, color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Leaf size={12} />
+                Especie
+              </span>
               <span style={{ fontSize: 12, fontWeight: 600 }}>{speciesResult.species}</span>
             </div>
             <div style={{
               padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
-              display: 'flex', justifyContent: 'space-between'
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
-              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Confianza</span>
+              <span style={{ fontSize: 12, color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle2 size={12} />
+                Confianza
+              </span>
               <span style={{ fontSize: 12, fontWeight: 600 }}>{speciesResult.confidence}%</span>
             </div>
           </div>
@@ -785,7 +840,17 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
             disabled={uploading}
             style={{ ...btnPrimary, opacity: uploading ? 0.7 : 1 }}
           >
-            {uploading ? 'Subiendo...' : '📤 Subir y Registrar'}
+            {uploading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Subiendo...
+              </>
+            ) : (
+              <>
+                <Upload size={16} />
+                Subir y Registrar
+              </>
+            )}
           </button>
 
           <button
@@ -793,10 +858,12 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
             style={{
               marginTop: 12, padding: 12, borderRadius: 8, border: 'none',
               background: 'transparent', color: 'var(--t3)', cursor: 'pointer',
-              fontSize: 13, width: '100%'
+              fontSize: 13, width: '100%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
             }}
           >
-            ← Cambiar especie
+            <ArrowLeft size={14} />
+            Cambiar especie
           </button>
         </div>
       )}
@@ -807,9 +874,9 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
           <div style={{
             width: 72, height: 72, borderRadius: 20, background: '#dcfce7',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 20px', fontSize: 36
+            margin: '0 auto 20px'
           }}>
-            ✅
+            <CheckCircle2 size={36} style={{ color: 'var(--green)' }} />
           </div>
           <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
             Registro exitoso
@@ -819,6 +886,7 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
           </p>
           
           <button onClick={handleReset} style={btnPrimary}>
+            <TreePine size={16} />
             Capturar otro arbol
           </button>
         </div>

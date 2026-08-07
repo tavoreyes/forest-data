@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { 
+  ArrowLeft, Plus, Eye, Trash2, 
+  TreePine, Heart, AlertTriangle 
+} from 'lucide-react';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -29,10 +33,16 @@ export default function AdminPage() {
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 20px' }}>
       <header style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <Link href="/" style={{ fontSize: 12, color: 'var(--t3)' }}>← Inicio</Link>
+          <Link href="/" style={{ fontSize: 12, color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <ArrowLeft size={14} />
+            Inicio
+          </Link>
           <h1 style={{ fontSize: 20, fontWeight: 700, marginTop: 8 }}>Panel de administracion</h1>
         </div>
-        <Link href="/arboles/nuevo" className="btn btn-primary">+ Nuevo arbol</Link>
+        <Link href="/arboles/nuevo" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Plus size={14} />
+          Nuevo arbol
+        </Link>
       </header>
 
       {stats && (
@@ -80,15 +90,18 @@ export default function AdminPage() {
                     <button
                       className="btn btn-ghost btn-sm"
                       onClick={() => router.push(`/arboles/${t.id}`)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4 }}
                     >
+                      <Eye size={12} />
                       Ver
                     </button>
                     <button
                       className="btn btn-ghost btn-sm"
-                      style={{ color: 'var(--red)', borderColor: 'var(--red-bd)' }}
+                      style={{ color: 'var(--red)', borderColor: 'var(--red-bd)', display: 'flex', alignItems: 'center', gap: 4 }}
                       onClick={() => handleDelete(t.id)}
                       disabled={deleting === t.id}
                     >
+                      <Trash2 size={12} />
                       {deleting === t.id ? '...' : 'Eliminar'}
                     </button>
                   </div>

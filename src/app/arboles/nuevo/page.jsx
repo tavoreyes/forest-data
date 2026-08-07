@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { 
+  ArrowLeft, AlertTriangle, TreePine, 
+  MapPin, Ruler, Calendar, FileText 
+} from 'lucide-react';
 
 export default function NuevoArbolPage() {
   const router = useRouter();
@@ -135,7 +139,8 @@ export default function NuevoArbolPage() {
 
         {error && (
           <div className="alert alert-error">
-            <span>⚠️</span> {error}
+            <AlertTriangle size={14} />
+            {error}
           </div>
         )}
 

@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { 
+  TreePine, Camera, ClipboardList, Settings, Plus,
+  ChevronDown, ChevronUp, Activity, MapPin
+} from 'lucide-react';
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false });
 
@@ -23,20 +27,32 @@ export default function HomePage() {
           <div style={{
             width: 36, height: 36, borderRadius: 10, background: 'var(--green)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: 18, boxShadow: '0 2px 8px rgba(22,163,74,0.25)'
+            color: '#fff', boxShadow: '0 2px 8px rgba(22,163,74,0.25)'
           }}>
-            🌲
+            <TreePine size={18} />
           </div>
           <div>
             <h1 style={{ fontSize: 16, fontWeight: 700 }}>ForestData</h1>
-            <div style={{ fontSize: 11, color: 'var(--t3)' }}>Michoacán · CECyTE</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)' }}>Michoacan · CECyTE</div>
           </div>
         </div>
         <nav style={{ display: 'flex', gap: 8 }}>
-          <Link href="/capturar" className="btn btn-primary">📸 Capturar</Link>
-          <Link href="/arboles" className="btn btn-ghost">📋 Arboles</Link>
-          <Link href="/admin" className="btn btn-ghost">⚙️ Admin</Link>
-          <Link href="/arboles/nuevo" className="btn btn-ghost">+ Registrar</Link>
+          <Link href="/capturar" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Camera size={14} />
+            Capturar
+          </Link>
+          <Link href="/arboles" className="btn btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ClipboardList size={14} />
+            Arboles
+          </Link>
+          <Link href="/admin" className="btn btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Settings size={14} />
+            Admin
+          </Link>
+          <Link href="/arboles/nuevo" className="btn btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Plus size={14} />
+            Registrar
+          </Link>
         </nav>
       </header>
 
@@ -71,23 +87,29 @@ export default function HomePage() {
                   display: 'flex', justifyContent: 'space-between', padding: '7px 0',
                   borderBottom: '1px solid var(--border)', fontSize: 12
                 }}>
-                  <span style={{ fontWeight: 500 }}>{z.zone}</span>
+                  <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <MapPin size={10} />
+                    {z.zone}
+                  </span>
                   <span style={{ color: 'var(--t3)', fontVariantNumeric: 'tabular-nums' }}>{z.count}</span>
                 </div>
               ))}
             </div>
 
             <div style={{ marginTop: 16 }}>
-              <Link href="/arboles/nuevo" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                + Registrar arbol
+              <Link href="/arboles/nuevo" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Plus size={14} />
+                Registrar arbol
               </Link>
             </div>
 
             <button 
               className="sidebar-toggle"
               onClick={() => setSidebarExpanded(!sidebarExpanded)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              {sidebarExpanded ? '▲ Menos' : '▼ Mas'}
+              {sidebarExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              {sidebarExpanded ? 'Menos' : 'Mas'}
             </button>
           </aside>
         )}
