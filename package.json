@@ -1,30 +1,31 @@
 {
-    "name":  "forest-data",
-    "version":  "0.1.0",
-    "private":  true,
-    "type":  "module",
-    "scripts":  {
-                    "dev":  "next dev",
-                    "build":  "next build",
-                    "start":  "next start",
-                    "lint":  "next lint"
-                },
-    "dependencies":  {
-                         "better-sqlite3":  "^13.0.3",
-                         "leaflet":  "^1.9.4",
-                         "next":  "^14.2.0",
-                         "react":  "^18.3.0",
-                         "react-dom":  "^18.3.0",
-                         "react-leaflet":  "^4.2.1",
-                         "sharp":  "^0.33.0",
-                         "@aws-sdk/client-s3":  "^3.500.0",
-                         "openai":  "^4.20.0"
-                     },
-    "devDependencies":  {
-                            "@types/leaflet":  "^1.9.0",
-                            "@types/node":  "26.1.2",
-                            "@types/react":  "19.2.18",
-                            "eslint":  "^8.0.0",
-                            "eslint-config-next":  "^14.2.0"
-                        }
+    "name": "forest-data",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "next dev -p 3010",
+        "build": "next build",
+        "start": "next start -p 3010",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@aws-sdk/client-s3": "^3.500.0",
+        "better-sqlite3": "^13.0.3",
+        "leaflet": "^1.9.4",
+        "lucide-react": "^1.30.0",
+        "next": "^14.2.0",
+        "openai": "^4.20.0",
+        "react": "^18.3.0",
+        "react-dom": "^18.3.0",
+        "react-leaflet": "^4.2.1",
+        "sharp": "^0.33.0"
+    },
+    "devDependencies": {
+        "@types/leaflet": "^1.9.0",
+        "@types/node": "26.1.2",
+        "@types/react": "19.2.18",
+        "eslint": "^8.0.0",
+        "eslint-config-next": "^14.2.0"
+    }
 }

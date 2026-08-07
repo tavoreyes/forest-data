@@ -55,8 +55,10 @@ npm install
 npm run dev
 
 # Abrir en navegador
-# http://localhost:3000
+# http://localhost:3010
 ```
+
+> El servidor de desarrollo corre en el puerto **3010** (antes 3000) para no chocar con contenedores Docker que usan el 3000.
 
 Requiere Node.js 18+ y Python 3.11+ (para medicion ArUco).
 

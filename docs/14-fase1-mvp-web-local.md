@@ -21,7 +21,7 @@ Construir un MVP funcional que permita registrar arboles reales, verlos en un ma
 | Estilos | CSS vanilla (existente) | Reutilizar styles.css de la maqueta, sin framework adicional |
 | Auth | Sin auth en Fase 1 | Panel privado sin login; se agrega en Fase 2 |
 | Package manager | npm | Funciona sin problemas de build scripts en Windows |
-| Hosting | Local (localhost:3000) | Solo desarrollo local |
+| Hosting | Local (localhost:3010) | Solo desarrollo local |
 
 ## Alcance incluido
 
@@ -142,7 +142,7 @@ forest-data/
 
 ## Criterios de salida
 
-1. `npm run dev` inicia el servidor en localhost:3000
+1. `npm run dev` inicia el servidor en localhost:3010
 2. La homepage muestra un mapa con arboles de ejemplo
 3. Se puede crear un arbol nuevo desde /arboles/nuevo
 4. El arbol nuevo aparece en el mapa y en el listado
