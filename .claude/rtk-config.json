@@ -1,0 +1,65 @@
+{
+  "filters": {
+    "logs": {
+      "enabled": true,
+      "pattern": "\\[.*\\]\\s*(DEBUG|TRACE|VERBOSE)",
+      "keep": ["ERROR", "WARN", "INFO"]
+    },
+    "files": {
+      "exclude": [
+        "node_modules",
+        ".next",
+        "build",
+        "dist",
+        "data/forestdata.db",
+        "data/forestdata.db-wal",
+        "data/forestdata.db-shm",
+        ".git",
+        "*.log",
+        "*.sqlite",
+        "*.db",
+        "coverage",
+        ".turbo",
+        "*.tsbuildinfo"
+      ],
+      "max_size": "500KB",
+      "include_patterns": [
+        "src/**/*.{js,jsx,ts,tsx}",
+        "docs/**/*.md",
+        "*.config.{js,ts,json}",
+        "package.json",
+        "CLAUDE.md",
+        "CONTEXTO.md",
+        ".claude/memory/**/*.md"
+      ]
+    },
+    "dedup": {
+      "consecutive": true,
+      "similarity": 0.95
+    },
+    "output": {
+      "strip_ansi": true,
+      "truncate_lines": 100,
+      "truncate_chars": 5000
+    }
+  },
+  "compression": {
+    "enabled": true,
+    "truncate": 500,
+    "keep_start_end": true,
+    "summarize_lists": true,
+    "max_array_items": 20
+  },
+  "project_specific": {
+    "forestdata": {
+      "always_include": [
+        "CLAUDE.md",
+        "CONTEXTO.md",
+        ".claude/memory/DECISIONS.md",
+        ".claude/memory/learned-rules.md"
+      ],
+      "context_budget_tokens": 8000,
+      "prioritize_recent": true
+    }
+  }
+}

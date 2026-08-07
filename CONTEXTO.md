@@ -1,30 +1,53 @@
 # Contexto Activo - ForestData
 
-## Estado actual
+## Estado actual (2026-08-06)
 
-ForestData contiene una maqueta estatica en `forestdata-dash.html`, documentacion base en `docs/` y una presentacion Marp en `presentations/forestdata-presentacion.marp.md`. Todavia no hay backend, base de datos, autenticacion, app movil, persistencia ni integracion real de IA.
+Fase 0 completada. Fase 1 — codigo creado y diseno mejorado, pendiente commit y prueba end-to-end.
 
-El proyecto no tiene repositorio Git inicializado en esta carpeta.
+### Stack definido (DEC-003, DEC-004)
 
-## Metodologia acordada
+| Capa | Tecnologia |
+|---|---|
+| Framework | Next.js 14+ (App Router) |
+| DB | SQLite via better-sqlite3 |
+| Package manager | npm |
+| Mapas | Leaflet + react-leaflet |
+| Estilos | CSS vanilla (tokens + componentes propios) |
+| Auth | Sin auth en Fase 1 |
 
-Se adopta una base permanente de Project Bootstrap + Persistent Context + Session Efficiency para mantener continuidad y reducir desperdicio de tokens.
+### Archivos de diseno
 
-SDD + Plan First se activa de forma obligatoria en cambios estructurales: stack, arquitectura, base de datos, API, autenticacion, permisos, privacidad, GPS, fotos, IA o cambios que afecten mas de 3 archivos.
+- `PRODUCT.md` — Register: product. North Star: "El Cuaderno de Campo". Personalidad: Confiable, Claro, Accesible.
+- `DESIGN.md` — Paleta minimalista (verde puntual, grises puros), tipografia Inter, elevacion funcional, componentes amigables.
 
-## Proximo paso recomendado
+### Codigo fuente (14 archivos)
 
-Completar Fase 0 del roadmap:
+**API:** trees/route.js, trees/[id]/route.js, trees/[id]/care/route.js, stats/route.js
+**Pages:** layout.jsx, page.jsx (home), arboles/page.jsx, arboles/[id]/page.jsx, arboles/nuevo/page.jsx, admin/page.jsx
+**Components:** Map.jsx, DetailMap.jsx
+**DB:** src/lib/db.js (schema + seed 15 arboles)
+**Config:** next.config.js, package.json, globals.css
 
-- Inicializar Git.
-- Separar la maqueta en archivos mantenibles.
-- Crear `.gitignore`.
-- Documentar como abrir la maqueta.
-- Definir el stack tecnico final mediante una especificacion breve.
-- Reemplazar placeholders de la presentacion con imagenes generadas o seleccionadas.
+### Endpoints verificados (8/8 OK)
 
-## Bloqueos o decisiones pendientes
+GET /, /api/stats, /api/trees, /arboles, /arboles/nuevo, /arboles/1, /admin — todos 200
 
-- Stack final pendiente: frontend, backend, base de datos, almacenamiento de fotos y autenticacion.
-- Politica de privacidad y consentimiento pendiente antes de datos reales.
-- Gobernanza de usuarios y roles pendiente.
+### Decisiones cerradas
+
+- DEC-001: Separar monolito HTML en archivos
+- DEC-002: Metadata por defecto no es mentira
+- DEC-003: Stack Next.js + SQLite local
+- DEC-004: pnpm → npm (bloqueo en Windows)
+
+### Pendiente proxima sesion
+
+1. Commit de Fase 1 (todo el codigo nuevo)
+2. Probar POST /api/trees (crear arbol)
+3. Probar POST /api/trees/1/care (registrar cuidado)
+4. Verificar arbol nuevo aparece en mapa y listado
+5. Cerrar Fase 1 en roadmap
+6. Abrir en navegador para verificar diseno visual
+
+## Proximo paso
+
+Commit + prueba end-to-end + cierre de Fase 1.

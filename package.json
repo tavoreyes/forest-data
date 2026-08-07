@@ -1,0 +1,27 @@
+{
+    "name":  "forest-data",
+    "version":  "0.1.0",
+    "private":  true,
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "next dev",
+                    "build":  "next build",
+                    "start":  "next start",
+                    "lint":  "next lint"
+                },
+    "dependencies":  {
+                         "better-sqlite3":  "^13.0.3",
+                         "leaflet":  "^1.9.4",
+                         "next":  "^14.2.0",
+                         "react":  "^18.3.0",
+                         "react-dom":  "^18.3.0",
+                         "react-leaflet":  "^4.2.1"
+                     },
+    "devDependencies":  {
+                            "@types/leaflet":  "^1.9.0",
+                            "@types/node":  "26.1.2",
+                            "@types/react":  "19.2.18",
+                            "eslint":  "^8.0.0",
+                            "eslint-config-next":  "^14.2.0"
+                        }
+}

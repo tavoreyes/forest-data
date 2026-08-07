@@ -28,6 +28,10 @@ venv/
 dist/
 build/
 *.tsbuildinfo
+.next/
+
+# Database
+data/*.db
 
 # Marp exports
 presentations/*.html

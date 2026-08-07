@@ -1,0 +1,56 @@
+{
+  "mcpServers": {
+    "token-optimizer": {
+      "command": "npx",
+      "args": ["-y", "token-optimizer-mcp@latest"],
+      "env": {
+        "CACHE_TTL": "3600",
+        "COMPRESSION": "aggressive",
+        "MAX_CACHE_SIZE_MB": "100",
+        "CACHE_DIR": ".claude/cache/token-optimizer"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "args_extra": ["C:\\Users\\usuario\\Proyectos\\nexus\\GitHub\\forest-data"],
+      "env": {}
+    }
+  },
+  "tokenOptimizer": {
+    "cacheStrategy": "lru",
+    "defaultTTL": 3600,
+    "compressionLevel": 9,
+    "cacheableTools": [
+      "read",
+      "glob",
+      "grep",
+      "bash"
+    ],
+    "nonCacheableTools": [
+      "write",
+      "edit",
+      "todowrite",
+      "skill"
+    ],
+    "projectCacheKeys": {
+      "forestdata": [
+        "docs/03-arquitectura-tecnica.md",
+        "docs/04-modelo-datos.md",
+        "docs/06-privacidad-seguridad.md",
+        "docs/12-metodologia-desarrollo.md",
+        "src/lib/db.js",
+        "package.json",
+        "CLAUDE.md",
+        "CONTEXTO.md"
+      ]
+    }
+  },
+  "checkpointProtocol": {
+    "enabled": true,
+    "triggerMessageCount": 15,
+    "summaryMaxTokens": 500,
+    "checkpointDir": ".claude/checkpoints",
+    "resumePromptTemplate": "[RESUMEN DE SESIÓN ANTERIOR]\n{dense_summary}\n\n---\nCONTEXTO ACTUAL: {contexto_md}\nPRÓXIMO PASO: {next_step}\n\nContinúa desde aquí."
+  }
+}

@@ -2,42 +2,45 @@
 
 Este roadmap prioriza construir confianza antes que funciones llamativas.
 
-## Fase 0: Ordenar la maqueta
+## Fase 0: Ordenar la maqueta — COMPLETADA (2026-08-06)
 
 Objetivo: convertir el prototipo actual en una base mantenible.
 
-Tareas:
+Tareas completadas:
 
-- Corregir HTML duplicado.
-- Separar CSS y JavaScript.
-- Eliminar referencias inexistentes.
-- Calcular conteos desde datos.
-- Marcar claramente funciones simuladas.
-- Crear repositorio Git.
+- [x] Corregir HTML duplicado.
+- [x] Separar CSS y JavaScript (index.html, styles.css, data.js, app.js).
+- [x] Eliminar referencias inexistentes.
+- [x] Calcular conteos desde datos.
+- [x] Marcar claramente funciones simuladas.
+- [x] Crear repositorio Git.
 
-Criterio de salida:
+Criterio de salida cumplidos:
 
-- La maqueta abre sin errores evidentes.
-- Los datos visibles coinciden con la fuente interna.
-- El codigo puede ser entendido por alumnos.
+- [x] La maqueta abre sin errores evidentes.
+- [x] Los datos visibles coinciden con la fuente interna.
+- [x] El codigo puede ser entendido por alumnos.
 
-## Fase 1: MVP web local
+## Fase 1: MVP web local — EN PROGRESO
 
 Objetivo: registrar y consultar arboles con datos reales basicos.
 
 Tareas:
 
-- Crear backend.
-- Crear base de datos.
-- CRUD de arboles.
-- Captura de ubicacion.
-- Listado y mapa.
-- Ficha publica simple.
-- Panel privado basico.
+- [x] Crear backend (Next.js 14 App Router).
+- [x] Crear base de datos SQLite (better-sqlite3, schema, seed data 15 arboles).
+- [x] CRUD de arboles (API routes: GET, POST, PUT, DELETE).
+- [x] Captura de ubicacion (lat/lng en formulario).
+- [x] Listado y mapa (Leaflet, filtros por zona/salud, busqueda).
+- [x] Ficha publica simple (detalle con mapa, historial de cuidados).
+- [x] Panel privado basico (admin con tabla y acciones).
+- [ ] Commit y cierre de Fase 1.
+- [ ] Probar flujo end-to-end completo (crear -> mapa -> detalle -> cuidado).
 
 Criterio de salida:
 
-- Se puede registrar un arbol real y verlo en mapa publico.
+- [x] Se puede registrar un arbol real y verlo en mapa publico.
+- [ ] Flujo completo verificado sin errores.
 
 ## Fase 2: Captura movil
 

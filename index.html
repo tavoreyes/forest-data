@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ForestData — Demo</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-mark">
+        <iconify-icon icon="ph:tree-evergreen" style="font-size:16px;color:#fff;"></iconify-icon>
+      </div>
+      <div>
+        <div class="sb-name">ForestData</div>
+        <div class="sb-ver">Michoacan · CECyTE</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section-label">PRINCIPAL</div>
+      <button class="nav-item active" data-page="home">
+        <iconify-icon icon="ph:map-trifold" style="font-size:16px;"></iconify-icon>
+        Panel general
+      </button>
+      <button class="nav-item" data-page="trees">
+        <iconify-icon icon="ph:tree" style="font-size:16px;"></iconify-icon>
+        Arboles
+        <span class="nav-badge">47</span>
+      </button>
+      <button class="nav-item" data-page="register">
+        <iconify-icon icon="ph:clipboard-text" style="font-size:16px;"></iconify-icon>
+        Registrar cuidado
+      </button>
+
+      <div class="sb-section-label" style="margin-top:6px;">PROXIMAMENTE</div>
+      <button class="nav-item disabled">
+        <iconify-icon icon="ph:qr-code" style="font-size:16px;"></iconify-icon>
+        Escanear QR
+        <span class="nav-soon">Proximo</span>
+      </button>
+      <button class="nav-item disabled">
+        <iconify-icon icon="ph:chart-line-up" style="font-size:16px;"></iconify-icon>
+        Reportes
+        <span class="nav-soon">Proximo</span>
+      </button>
+      <button class="nav-item disabled">
+        <iconify-icon icon="ph:export" style="font-size:16px;"></iconify-icon>
+        Exportar datos
+        <span class="nav-soon">Proximo</span>
+      </button>
+    </nav>
+
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-avatar">GR</div>
+        <div>
+          <div class="sb-uname">Dr. Gustavo Reyes</div>
+          <div class="sb-urole">Coordinador de campo</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- HOME -->
+  <div id="page-home" class="page active">
+    <div class="topbar">
+      <span class="tb-title">Panel general</span>
+      <div class="tb-sep"></div>
+      <span class="tb-sub">Michoacan</span>
+      <div class="tb-right">
+        <button class="btn-icon"><iconify-icon icon="ph:arrows-clockwise" style="font-size:14px;"></iconify-icon></button>
+        <button class="btn-primary" onclick="navigate('register')">
+          <iconify-icon icon="ph:plus" style="font-size:13px;"></iconify-icon>
+          Registrar arbol
+        </button>
+      </div>
+    </div>
+    <div class="home-body">
+      <div class="home-stats">
+        <div class="stat-block">
+          <div class="stat-label">ARBOLES REGISTRADOS</div>
+          <div class="stat-num">47</div>
+          <div class="stat-delta delta-up">
+            <iconify-icon icon="ph:trend-up" style="font-size:12px;"></iconify-icon>+3 este mes
+          </div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">ALTURA PROMEDIO</div>
+          <div class="stat-num">84<span class="unit"> cm</span></div>
+          <div class="stat-delta delta-up">
+            <iconify-icon icon="ph:trend-up" style="font-size:12px;"></iconify-icon>+12 cm desde enero
+          </div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">ULTIMO CUIDADO</div>
+          <div class="stat-num" style="font-size:18px;padding-top:4px;">Hace 2 dias</div>
+          <div class="stat-delta delta-warn">
+            <iconify-icon icon="ph:warning-circle" style="font-size:12px;"></iconify-icon>2 arboles sin atencion reciente
+          </div>
+        </div>
+        <div class="health-bar-wrap">
+          <div class="stat-label">DISTRIBUCION DE SALUD</div>
+          <div class="health-bar">
+            <div class="hb-good" style="flex:38"></div>
+            <div class="hb-fair" style="flex:7"></div>
+            <div class="hb-poor" style="flex:2"></div>
+          </div>
+          <div class="health-legend">
+            <div class="hl-item"><div class="hl-dot" style="background:var(--green)"></div>38 buenos</div>
+            <div class="hl-item"><div class="hl-dot" style="background:var(--amber)"></div>7 regulares</div>
+            <div class="hl-item"><div class="hl-dot" style="background:var(--red)"></div>2 malos</div>
+          </div>
+        </div>
+        <div class="zone-list">
+          <div class="stat-label" style="margin-bottom:4px;">ZONAS ACTIVAS</div>
+          <div class="zone-item">
+            <div class="zone-dot" style="background:var(--green)"></div>
+            <span class="zone-name">Zona A</span><span class="zone-count">21 arboles</span>
+          </div>
+          <div class="zone-item">
+            <div class="zone-dot" style="background:var(--green)"></div>
+            <span class="zone-name">Zona B</span><span class="zone-count">18 arboles</span>
+          </div>
+          <div class="zone-item">
+            <div class="zone-dot" style="background:var(--amber)"></div>
+            <span class="zone-name">Zona C</span><span class="zone-count">8 arboles</span>
+          </div>
+        </div>
+        <div class="weather-block">
+          <div class="stat-label">CONDICIONES ACTUALES</div>
+          <div class="weather-row">
+            <div class="weather-cell"><div class="wc-val">16°C</div><div class="wc-lbl">Temp.</div></div>
+            <div class="weather-cell"><div class="wc-val">72%</div><div class="wc-lbl">Humedad</div></div>
+            <div class="weather-cell"><div class="wc-val">14 km/h</div><div class="wc-lbl">Viento</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="map-area">
+        <div id="map"></div>
+        <div class="map-ctrl" id="btn-center" title="Centrar mapa">
+          <iconify-icon icon="ph:crosshair" style="font-size:16px;"></iconify-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TREES -->
+  <div id="page-trees" class="page">
+    <div class="topbar">
+      <span class="tb-title">Arboles</span>
+      <div class="tb-sep"></div>
+      <span class="tb-sub" id="tree-count-label">47 registros</span>
+      <div class="tb-right">
+        <div style="position:relative;">
+          <iconify-icon icon="ph:magnifying-glass" style="font-size:13px;color:var(--t3);position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;"></iconify-icon>
+          <input id="table-search" style="background:var(--s2);border:1px solid var(--bmd);border-radius:7px;padding:7px 10px 7px 30px;font-size:12px;color:var(--t1);font-family:Inter,sans-serif;outline:none;width:200px;" placeholder="Buscar...">
+        </div>
+        <button class="btn-primary" onclick="navigate('register')">
+          <iconify-icon icon="ph:plus" style="font-size:13px;"></iconify-icon>Nuevo arbol
+        </button>
+      </div>
+    </div>
+    <div class="trees-body">
+      <div class="filter-sidebar">
+        <div>
+          <div class="fs-label">ESTADO</div>
+          <button class="fs-chip active" data-tf="all">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--t3);flex-shrink:0;"></div>Todos
+            <span style="margin-left:auto;font-size:10px;color:var(--t3);">47</span>
+          </button>
+          <button class="fs-chip" data-tf="good">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>Saludable
+            <span style="margin-left:auto;font-size:10px;color:var(--t3);">38</span>
+          </button>
+          <button class="fs-chip amber" data-tf="fair">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;"></div>Regular
+            <span style="margin-left:auto;font-size:10px;color:var(--t3);">7</span>
+          </button>
+          <button class="fs-chip red" data-tf="poor">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;"></div>Malo
+            <span style="margin-left:auto;font-size:10px;color:var(--t3);">2</span>
+          </button>
+        </div>
+        <div>
+          <div class="fs-label">ZONA</div>
+          <button class="fs-chip active2" data-tz="all" style="color:var(--t2);">Todas las zonas</button>
+          <button class="fs-chip" data-tz="Zona A">Zona A</button>
+          <button class="fs-chip" data-tz="Zona B">Zona B</button>
+          <button class="fs-chip" data-tz="Zona C">Zona C</button>
+        </div>
+      </div>
+      <div class="trees-table-wrap">
+        <table class="tree-table">
+          <thead>
+            <tr>
+              <th></th><th>Especie</th><th>Codigo</th><th>Zona</th>
+              <th>Alumno</th><th>Altura</th><th>Crecimiento</th>
+              <th>Estado</th><th>Ultimo cuidado</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tree-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div id="page-detail" class="page">
+    <div class="topbar">
+      <button class="btn-ghost" onclick="navigate('trees')">
+        <iconify-icon icon="ph:arrow-left" style="font-size:13px;"></iconify-icon>Volver a arboles
+      </button>
+      <div class="tb-sep"></div>
+      <span class="tb-title" id="detail-topbar-name">Arbol</span>
+      <div class="tb-right">
+        <button class="btn-icon"><iconify-icon icon="ph:qr-code" style="font-size:14px;"></iconify-icon></button>
+        <button class="btn-primary" onclick="navigate('register')">
+          <iconify-icon icon="ph:plus-circle" style="font-size:13px;"></iconify-icon>Registrar cuidado
+        </button>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-left" id="detail-left-content"></div>
+      <div class="detail-right">
+        <div class="detail-map"><div id="detail-map"></div></div>
+        <div class="detail-chart-panel">
+          <div class="chart-header">
+            <span class="chart-title-text">Crecimiento — ultimos 6 meses</span>
+            <span class="chart-growth-tag" id="chart-growth-tag"></span>
+          </div>
+          <canvas id="growth-chart" style="height:120px !important;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="page-register" class="page">
+    <div class="topbar">
+      <button class="btn-ghost" onclick="navigate('trees')">
+        <iconify-icon icon="ph:arrow-left" style="font-size:13px;"></iconify-icon>Cancelar
+      </button>
+      <div class="tb-sep"></div>
+      <span class="tb-title">Registrar cuidado</span>
+      <div class="tb-pill"><div class="live-dot"></div>Clima listo</div>
+      <div class="tb-right">
+        <button class="btn-primary" id="btn-save-care" onclick="simulateAI()">
+          <iconify-icon icon="ph:sparkle" style="font-size:13px;"></iconify-icon>
+          Analizar con IA y guardar
+        </button>
+      </div>
+    </div>
+    <div class="reg-body">
+      <div class="reg-form">
+        <div class="form-group">
+          <div class="form-label">ARBOL</div>
+          <select class="form-input" style="cursor:pointer;">
+            <option>Pinus pseudostrobus #A-01 — Zona A</option>
+            <option>Pinus montezumae #A-02 — Zona A</option>
+            <option>Quercus rugosa #A-08 — Zona A</option>
+            <option>Pinus leiophylla #B-01 — Zona B</option>
+            <option>Pinus montezumae #C-02 — Zona C</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">FECHA</div>
+            <input class="form-input" type="text" value="30 abr 2025" readonly>
+          </div>
+          <div class="form-group">
+            <div class="form-label">AGUA SUMINISTRADA (L)</div>
+            <input class="form-input" type="text" value="1.5" placeholder="ej. 1.5">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">FOTO DEL ARBOL CON REGLA DE 30 cm</div>
+          <div class="photo-upload" id="photo-upload-zone" onclick="simulatePhotoSelect()">
+            <iconify-icon icon="ph:camera-plus" style="font-size:28px;color:var(--t3);"></iconify-icon>
+            <div class="pu-label">Tomar foto o cargar desde galeria</div>
+            <div class="pu-sub">La IA estima la altura usando la regla como referencia</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">CONDICIONES AMBIENTALES <span style="color:var(--green);font-weight:600;">— AUTOMATICAS</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <div style="background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;">
+              <div style="font-size:14px;font-weight:700;color:var(--t1);">16°C</div>
+              <div style="font-size:10px;color:var(--t3);margin-top:2px;">Temperatura</div>
+            </div>
+            <div style="background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;">
+              <div style="font-size:14px;font-weight:700;color:var(--t1);">72%</div>
+              <div style="font-size:10px;color:var(--t3);margin-top:2px;">Humedad</div>
+            </div>
+            <div style="background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;">
+              <div style="font-size:14px;font-weight:700;color:var(--t1);">14 km/h</div>
+              <div style="font-size:10px;color:var(--t3);margin-top:2px;">Viento</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">NOTAS ADICIONALES</div>
+          <textarea class="form-input" rows="3" placeholder="Observaciones del campo..." style="resize:none;line-height:1.5;"></textarea>
+        </div>
+        <div class="ai-preview" id="ai-preview">
+          <div class="ai-header">
+            <iconify-icon icon="ph:sparkle" style="font-size:14px;color:#7c3aed;"></iconify-icon>
+            <span class="ai-title">Analisis Gemini</span>
+            <span style="font-size:10px;color:var(--t3);margin-left:auto;">gemini-2.5-flash</span>
+          </div>
+          <div class="ai-processing" id="ai-idle">
+            <iconify-icon icon="ph:image-square" style="font-size:16px;color:var(--t3);"></iconify-icon>
+            <span style="color:var(--t3);">Sube una foto para activar el analisis</span>
+          </div>
+          <div class="ai-processing" id="ai-loading" style="display:none;">
+            <div class="ai-spin"></div>Analizando imagen y estimando altura...
+          </div>
+          <div class="ai-result" id="ai-done" style="display:none;">
+            <div class="ai-height-row">
+              <span class="ai-height-label">Altura estimada</span>
+              <span class="ai-height-val">114 cm</span>
+            </div>
+            <div style="height:1px;background:#e9d5ff;"></div>
+            <div class="ai-recs">
+              <div class="ai-rec"><div class="ai-rec-dot"></div>Arbol en buen estado general. Aciculas con color verde intenso uniforme.</div>
+              <div class="ai-rec"><div class="ai-rec-dot"></div>Aplicar fertilizante de liberacion lenta en los proximos 14 dias.</div>
+              <div class="ai-rec"><div class="ai-rec-dot"></div>Revisar humedad del suelo antes de las lluvias de mayo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reg-preview">
+        <div class="preview-photo" id="preview-photo-box">
+          <div id="photo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+            <iconify-icon icon="ph:tree-evergreen" style="font-size:52px;color:var(--t3);"></iconify-icon>
+            <span style="font-size:13px;color:var(--t3);">Vista previa de la foto</span>
+          </div>
+          <div id="photo-loaded" style="display:none;width:100%;height:100%;position:relative;">
+            <div style="width:100%;height:100%;background:linear-gradient(180deg,#d1fae5 0%,#a7f3d0 40%,#ecfdf5 100%);display:flex;align-items:center;justify-content:center;font-size:96px;">🌲</div>
+            <div style="position:absolute;bottom:12px;right:12px;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:11px;color:var(--t2);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);">
+              📏 Regla visible · referencia 30 cm
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="font-size:11px;color:var(--t3);">QR unico del arbol</div>
+          <div class="preview-qr">
+            <div class="qr-grid" id="qr-grid"></div>
+            <div style="font-size:10px;color:var(--t3);margin-top:4px;">A-01 · Zona A</div>
+          </div>
+          <div style="font-size:10px;color:var(--t3);text-align:center;max-width:160px;line-height:1.5;">
+            Escanea para abrir el arbol directo en la app
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
