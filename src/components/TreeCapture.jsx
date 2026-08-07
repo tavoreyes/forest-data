@@ -1,7 +1,37 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
+
+const SPECIES_OPTIONS = [
+  'Pinus leiophylla',
+  'Pinus montezumae',
+  'Pinus pseudostrobus',
+  'Pinus oocarpa',
+  'Pinus herrerensis',
+  'Cedrus deodara',
+  'Quercus rugosa',
+  'Quercus ilex',
+  'Eucalyptus globulus',
+  'Jacaranda mimosifolia'
+];
+
+const ZONE_OPTIONS = [
+  'Patio Central',
+  'Jardin Botanico',
+  'Entrada Principal',
+  'Deportes',
+  'Laboratorio',
+  'Auditorio',
+  'Biblioteca',
+  'Comedor'
+];
+
+const HEALTH_OPTIONS = [
+  { value: 'good', label: 'Saludable', color: '#166534', bg: '#dcfce7' },
+  { value: 'fair', label: 'Regular', color: '#92400e', bg: '#fef3c7' },
+  { value: 'poor', label: 'Malo', color: '#991b1b', bg: '#fee2e2' }
+];
 
 export default function TreeCapture({ trees, onCaptureComplete }) {
   const [selectedTree, setSelectedTree] = useState(null);
@@ -10,14 +40,23 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
   const [measurement, setMeasurement] = useState(null);
   const [speciesResult, setSpeciesResult] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [step, setStep] = useState(1); // 1: select tree, 2: take photo, 3: measure, 4: species, 5: done
+  const [step, setStep] = useState(1);
   const [error, setError] = useState(null);
   const [gpsCoords, setGpsCoords] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [heightInput, setHeightInput] = useState('');
+  const [newTreeMode, setNewTreeMode] = useState(false);
+  const [newTreeForm, setNewTreeForm] = useState({
+    code: '',
+    species: '',
+    zone: '',
+    health: 'good',
+    planted_at: new Date().toISOString().split('T')[0]
+  });
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  // Obtener GPS del usuario
   const getGPS = useCallback(() => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -36,14 +75,68 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     });
   }, []);
 
-  // Seleccionar árbol
+  const filteredTrees = useMemo(() => {
+    if (!searchQuery) return trees;
+    const q = searchQuery.toLowerCase();
+    return trees.filter(t =>
+      t.code?.toLowerCase().includes(q) ||
+      t.species?.toLowerCase().includes(q) ||
+      t.zone?.toLowerCase().includes(q)
+    );
+  }, [trees, searchQuery]);
+
   const handleTreeSelect = (tree) => {
     setSelectedTree(tree);
     setStep(2);
     setError(null);
+    setNewTreeMode(false);
   };
 
-  // Capturar foto (cámara o galería)
+  const handleNewTree = async () => {
+    if (!newTreeForm.code || !newTreeForm.species || !newTreeForm.zone) {
+      setError('Completa codigo, especie y zona');
+      return;
+    }
+
+    let coords = gpsCoords;
+    if (!coords) {
+      try {
+        coords = await getGPS();
+        setGpsCoords(coords);
+      } catch (err) {
+        setError('Activa el GPS para registrar un arbol nuevo');
+        return;
+      }
+    }
+
+    try {
+      const res = await fetch('/api/trees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: newTreeForm.code,
+          species: newTreeForm.species,
+          zone: newTreeForm.zone,
+          health: newTreeForm.health,
+          planted_at: newTreeForm.planted_at,
+          lat: coords.lat,
+          lng: coords.lng
+        })
+      });
+
+      if (res.ok) {
+        const tree = await res.json();
+        setSelectedTree(tree);
+        setStep(2);
+        setError(null);
+      } else {
+        setError('Error al crear el arbol');
+      }
+    } catch (err) {
+      setError('Error de conexion');
+    }
+  };
+
   const handlePhotoCapture = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -53,58 +146,29 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     setStep(3);
     setError(null);
 
-    // Obtener GPS
     try {
       const coords = await getGPS();
       setGpsCoords(coords);
     } catch (err) {
       console.warn('GPS no disponible:', err);
-      // Continuar sin GPS
     }
   };
 
-  // Enviar a medición ArUco
-  const handleMeasure = async () => {
-    if (!photo) return;
-
-    setUploading(true);
-    setError(null);
-
-    try {
-      // Convertir foto a base64
-      const base64 = await photo.arrayBuffer();
-      const base64String = btoa(
-        new Uint8Array(base64).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
-
-      // Por ahora, medición manual (estudiante ingresa altura)
-      // Cuando tengamos la regla ArUco, usaremos el endpoint de medición
-      setMeasurement({
-        height_cm: null,
-        source: 'pending',
-        message: 'Ingresa la altura manualmente'
-      });
-      setStep(4);
-
-    } catch (err) {
-      setError('Error al procesar la foto');
-      console.error(err);
-    } finally {
-      setUploading(false);
+  const handleManualHeight = () => {
+    const h = parseFloat(heightInput);
+    if (isNaN(h) || h <= 0) {
+      setError('Ingresa una altura valida');
+      return;
     }
-  };
-
-  // Enviar altura manual
-  const handleManualHeight = (heightCm) => {
     setMeasurement({
-      height_cm: heightCm,
+      height_cm: h,
       source: 'manual',
       confidence: 100
     });
-    setStep(5);
+    setStep(4);
+    setError(null);
   };
 
-  // Identificar especie con Pl@ntNet
   const handleIdentifySpecies = async () => {
     if (!photo) return;
 
@@ -112,7 +176,6 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     setError(null);
 
     try {
-      // Convertir foto a base64
       const base64 = await photo.arrayBuffer();
       const base64String = btoa(
         new Uint8Array(base64).reduce((data, byte) => data + String.fromCharCode(byte), '')
@@ -132,29 +195,26 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
       if (data.success) {
         setSpeciesResult(data.species);
       } else {
-        // Si Pl@ntNet falla, usar Gemma
         setSpeciesResult({
           species: selectedTree?.species || 'Pinus sp.',
           confidence: 50,
           source: 'fallback'
         });
       }
-      setStep(6);
+      setStep(5);
 
     } catch (err) {
-      // Fallback a especie del árbol
       setSpeciesResult({
         species: selectedTree?.species || 'Pinus sp.',
         confidence: 50,
         source: 'fallback'
       });
-      setStep(6);
+      setStep(5);
     } finally {
       setUploading(false);
     }
   };
 
-  // Subir foto a R2
   const handleUpload = async () => {
     if (!photo || !selectedTree) return;
 
@@ -162,13 +222,11 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     setError(null);
 
     try {
-      // Convertir a base64
       const base64 = await photo.arrayBuffer();
       const base64String = btoa(
         new Uint8Array(base64).reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
 
-      // Subir a R2
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,7 +243,6 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
         throw new Error('Error subiendo foto');
       }
 
-      // Registrar cuidado con la foto
       const careResponse = await fetch(`/api/trees/${selectedTree.id}/care`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -210,7 +267,7 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
           species: speciesResult,
           gps: gpsCoords
         });
-        setStep(7);
+        setStep(6);
       } else {
         throw new Error('Error registrando cuidado');
       }
@@ -223,7 +280,6 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     }
   };
 
-  // Reiniciar
   const handleReset = () => {
     setSelectedTree(null);
     setPhoto(null);
@@ -232,7 +288,67 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
     setSpeciesResult(null);
     setGpsCoords(null);
     setError(null);
+    setSearchQuery('');
+    setHeightInput('');
+    setNewTreeMode(false);
     setStep(1);
+  };
+
+  const selectStyle = {
+    width: '100%',
+    padding: '12px 14px',
+    borderRadius: 10,
+    border: '1px solid var(--border)',
+    background: '#fff',
+    fontSize: 14,
+    color: 'var(--t1)',
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 12px center',
+    cursor: 'pointer'
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 14px',
+    borderRadius: 10,
+    border: '1px solid var(--border)',
+    background: '#fff',
+    fontSize: 14,
+    color: 'var(--t1)',
+    boxSizing: 'border-box'
+  };
+
+  const labelStyle = {
+    fontSize: 12,
+    fontWeight: 600,
+    color: 'var(--t3)',
+    marginBottom: 6,
+    display: 'block'
+  };
+
+  const btnPrimary = {
+    width: '100%',
+    padding: '14px 16px',
+    borderRadius: 12,
+    border: 'none',
+    background: 'var(--green)',
+    color: '#fff',
+    cursor: 'pointer',
+    fontSize: 14,
+    fontWeight: 600
+  };
+
+  const btnSecondary = {
+    width: '100%',
+    padding: '14px 16px',
+    borderRadius: 12,
+    border: '1px solid var(--border)',
+    background: '#fff',
+    cursor: 'pointer',
+    fontSize: 14,
+    fontWeight: 500
   };
 
   return (
@@ -249,10 +365,18 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
         }}>
           📸
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: 18, fontWeight: 700 }}>Capturar Arbol</h1>
-          <div style={{ fontSize: 12, color: 'var(--t3)' }}>Paso {step} de 6</div>
+          <div style={{ fontSize: 12, color: 'var(--t3)' }}>Paso {step} de 5</div>
         </div>
+        {gpsCoords && (
+          <div style={{
+            padding: '4px 8px', borderRadius: 6, fontSize: 10,
+            background: '#dcfce7', color: '#166534'
+          }}>
+            GPS activo
+          </div>
+        )}
       </div>
 
       {/* Error */}
@@ -268,80 +392,217 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
       {/* Step 1: Seleccionar arbol */}
       {step === 1 && (
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Selecciona un arbol
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {trees.map((tree) => (
-              <button
-                key={tree.id}
-                onClick={() => handleTreeSelect(tree)}
-                style={{
-                  padding: 16, borderRadius: 12, border: '1px solid var(--border)',
-                  background: '#fff', cursor: 'pointer', textAlign: 'left',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>{tree.code}</div>
-                    <div style={{ fontSize: 12, color: 'var(--t3)' }}>{tree.species}</div>
-                  </div>
-                  <div style={{
-                    padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-                    background: tree.health === 'good' ? '#dcfce7' : tree.health === 'fair' ? '#fef3c7' : '#fee2e2',
-                    color: tree.health === 'good' ? '#166534' : tree.health === 'fair' ? '#92400e' : '#991b1b'
-                  }}>
-                    {tree.height_cm}cm
-                  </div>
-                </div>
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <button
+              onClick={() => setNewTreeMode(false)}
+              style={{
+                flex: 1, padding: 10, borderRadius: 8, border: 'none',
+                background: !newTreeMode ? 'var(--green)' : 'var(--s2)',
+                color: !newTreeMode ? '#fff' : 'var(--t2)',
+                cursor: 'pointer', fontSize: 13, fontWeight: 600
+              }}
+            >
+              Arbol existente
+            </button>
+            <button
+              onClick={() => setNewTreeMode(true)}
+              style={{
+                flex: 1, padding: 10, borderRadius: 8, border: 'none',
+                background: newTreeMode ? 'var(--green)' : 'var(--s2)',
+                color: newTreeMode ? '#fff' : 'var(--t2)',
+                cursor: 'pointer', fontSize: 13, fontWeight: 600
+              }}
+            >
+              + Arbol nuevo
+            </button>
           </div>
+
+          {!newTreeMode ? (
+            <>
+              <div style={{ position: 'relative', marginBottom: 12 }}>
+                <input
+                  type="text"
+                  placeholder="Buscar por codigo, especie o zona..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  style={{
+                    ...inputStyle,
+                    paddingLeft: 36
+                  }}
+                />
+                <span style={{
+                  position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+                  fontSize: 14, color: 'var(--t3)'
+                }}>
+                  🔍
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 400, overflowY: 'auto' }}>
+                {filteredTrees.map((tree) => (
+                  <button
+                    key={tree.id}
+                    onClick={() => handleTreeSelect(tree)}
+                    style={{
+                      padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)',
+                      background: '#fff', cursor: 'pointer', textAlign: 'left',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600 }}>{tree.code}</div>
+                        <div style={{ fontSize: 11, color: 'var(--t3)' }}>{tree.species}</div>
+                        <div style={{ fontSize: 10, color: 'var(--t3)', marginTop: 2 }}>{tree.zone}</div>
+                      </div>
+                      <div style={{
+                        padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                        background: HEALTH_OPTIONS.find(h => h.value === tree.health)?.bg || '#f3f4f6',
+                        color: HEALTH_OPTIONS.find(h => h.value === tree.health)?.color || '#374151'
+                      }}>
+                        {tree.height_cm}cm
+                      </div>
+                    </div>
+                  </button>
+                ))}
+                {filteredTrees.length === 0 && (
+                  <div style={{ padding: 20, textAlign: 'center', color: 'var(--t3)', fontSize: 13 }}>
+                    No se encontraron arboles
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Codigo del arbol *</label>
+                <input
+                  type="text"
+                  placeholder="Ej: P-011"
+                  value={newTreeForm.code}
+                  onChange={e => setNewTreeForm(f => ({ ...f, code: e.target.value }))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label style={labelStyle}>Especie *</label>
+                <select
+                  value={newTreeForm.species}
+                  onChange={e => setNewTreeForm(f => ({ ...f, species: e.target.value }))}
+                  style={selectStyle}
+                >
+                  <option value="">Seleccionar especie...</option>
+                  {SPECIES_OPTIONS.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Zona *</label>
+                <select
+                  value={newTreeForm.zone}
+                  onChange={e => setNewTreeForm(f => ({ ...f, zone: e.target.value }))}
+                  style={selectStyle}
+                >
+                  <option value="">Seleccionar zona...</option>
+                  {ZONE_OPTIONS.map(z => (
+                    <option key={z} value={z}>{z}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Salud</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {HEALTH_OPTIONS.map(h => (
+                    <button
+                      key={h.value}
+                      onClick={() => setNewTreeForm(f => ({ ...f, health: h.value }))}
+                      style={{
+                        flex: 1, padding: '10px 8px', borderRadius: 8,
+                        border: newTreeForm.health === h.value ? `2px solid ${h.color}` : '1px solid var(--border)',
+                        background: newTreeForm.health === h.value ? h.bg : '#fff',
+                        color: newTreeForm.health === h.value ? h.color : 'var(--t2)',
+                        cursor: 'pointer', fontSize: 12, fontWeight: 600
+                      }}
+                    >
+                      {h.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={labelStyle}>Fecha de plantacion</label>
+                <input
+                  type="date"
+                  value={newTreeForm.planted_at}
+                  onChange={e => setNewTreeForm(f => ({ ...f, planted_at: e.target.value }))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <button onClick={handleNewTree} style={btnPrimary}>
+                Crear arbol y continuar
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* Step 2: Tomar foto */}
       {step === 2 && (
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Toma una foto de {selectedTree?.code}
+          <div style={{
+            padding: 14, borderRadius: 10, background: 'var(--s2)',
+            marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{selectedTree?.code}</div>
+              <div style={{ fontSize: 11, color: 'var(--t3)' }}>{selectedTree?.species}</div>
+            </div>
+            <button
+              onClick={() => { setSelectedTree(null); setStep(1); }}
+              style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: '#fff', cursor: 'pointer', fontSize: 11 }}
+            >
+              Cambiar
+            </button>
+          </div>
+
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+            Toma una foto
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 16 }}>
+          <p style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 16 }}>
             Incluye la regla ArUco junto al arbol si la tienes
           </p>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button
               onClick={() => cameraInputRef.current?.click()}
               style={{
-                padding: 20, borderRadius: 12, border: '2px dashed var(--green)',
+                padding: 24, borderRadius: 12, border: '2px dashed var(--green)',
                 background: '#f0fdf4', cursor: 'pointer', textAlign: 'center'
               }}
             >
-              <div style={{ fontSize: 32, marginBottom: 8 }}>📷</div>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>📷</div>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--green)' }}>
                 Tomar Foto
               </div>
-              <div style={{ fontSize: 12, color: 'var(--t3)' }}>
-                Usa la camara del telefono
+              <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 4 }}>
+                Camara del telefono
               </div>
             </button>
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              style={{
-                padding: 16, borderRadius: 12, border: '1px solid var(--border)',
-                background: '#fff', cursor: 'pointer', textAlign: 'center'
-              }}
+              style={btnSecondary}
             >
-              <div style={{ fontSize: 14, fontWeight: 500 }}>
-                📁 Seleccionar de Galeria
-              </div>
+              📁 Seleccionar de Galeria
             </button>
           </div>
 
-          {/* Inputs ocultos */}
           <input
             ref={cameraInputRef}
             type="file"
@@ -363,21 +624,17 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
             style={{
               marginTop: 16, padding: 12, borderRadius: 8, border: 'none',
               background: 'transparent', color: 'var(--t3)', cursor: 'pointer',
-              fontSize: 13
+              fontSize: 13, width: '100%'
             }}
           >
-            ← Volver a seleccionar
+            ← Volver
           </button>
         </div>
       )}
 
-      {/* Step 3: Medir altura */}
+      {/* Step 3: Ingresar altura */}
       {step === 3 && photoPreview && (
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Mide la altura
-          </h2>
-          
           <div style={{ 
             borderRadius: 12, overflow: 'hidden', marginBottom: 16,
             border: '1px solid var(--border)'
@@ -387,111 +644,81 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
               alt="Foto capturada" 
               width={400}
               height={300}
-              style={{ width: '100%', height: 'auto', maxHeight: 300, objectFit: 'cover' }}
+              style={{ width: '100%', height: 'auto', maxHeight: 250, objectFit: 'cover' }}
             />
           </div>
 
-          <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 16 }}>
-            {gpsCoords ? 
-              `GPS: ${gpsCoords.lat.toFixed(6)}, ${gpsCoords.lng.toFixed(6)} (${gpsCoords.accuracy?.toFixed(1)}m)` :
-              'GPS no disponible'
-            }
-          </p>
+          {gpsCoords && (
+            <div style={{
+              padding: '8px 12px', borderRadius: 8, background: '#f0fdf4',
+              fontSize: 11, color: '#166534', marginBottom: 16
+            }}>
+              GPS: {gpsCoords.lat.toFixed(6)}, {gpsCoords.lng.toFixed(6)} ({gpsCoords.accuracy?.toFixed(1)}m)
+            </div>
+          )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
+            Altura del arbol
+          </h2>
+
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            <input
+              type="number"
+              placeholder="Altura en cm"
+              value={heightInput}
+              onChange={e => setHeightInput(e.target.value)}
+              style={{ ...inputStyle, flex: 1 }}
+              min="0"
+              step="1"
+            />
             <button
-              onClick={handleMeasure}
-              disabled={uploading}
+              onClick={handleManualHeight}
               style={{
-                padding: 16, borderRadius: 12, border: 'none',
+                padding: '12px 20px', borderRadius: 10, border: 'none',
                 background: 'var(--green)', color: '#fff', cursor: 'pointer',
-                fontSize: 14, fontWeight: 600, opacity: uploading ? 0.7 : 1
+                fontSize: 14, fontWeight: 600
               }}
             >
-              {uploading ? 'Procesando...' : '🔍 Detectar ArUco'}
-            </button>
-
-            <button
-              onClick={() => {
-                const height = prompt('Altura en cm:');
-                if (height && !isNaN(height)) {
-                  handleManualHeight(parseFloat(height));
-                }
-              }}
-              style={{
-                padding: 16, borderRadius: 12, border: '1px solid var(--border)',
-                background: '#fff', cursor: 'pointer', fontSize: 14
-              }}
-            >
-              ✏️ Ingresar Altura Manual
+              OK
             </button>
           </div>
 
-          <button
-            onClick={() => setStep(2)}
-            style={{
-              marginTop: 16, padding: 12, borderRadius: 8, border: 'none',
-              background: 'transparent', color: 'var(--t3)', cursor: 'pointer',
-              fontSize: 13
-            }}
-          >
-            ← Tomar otra foto
-          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => { setPhoto(null); setPhotoPreview(null); setStep(2); }}
+              style={{ ...btnSecondary, flex: 1 }}
+            >
+              Otra foto
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Step 4: Altura capturada */}
+      {/* Step 4: Identificar especie */}
       {step === 4 && (
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Altura registrada
-          </h2>
-          
           <div style={{
-            padding: 20, borderRadius: 12, background: '#f0fdf4',
+            padding: 14, borderRadius: 10, background: '#f0fdf4',
             border: '1px solid #bbf7d0', marginBottom: 16, textAlign: 'center'
           }}>
-            <div style={{ fontSize: 36, fontWeight: 700, color: 'var(--green)' }}>
-              {measurement?.height_cm || '---'} cm
+            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>
+              {measurement?.height_cm} cm
             </div>
-            <div style={{ fontSize: 12, color: 'var(--t3)' }}>
-              {measurement?.source === 'aruco' ? 'Medido con ArUco' : 'Altura manual'}
-            </div>
+            <div style={{ fontSize: 11, color: 'var(--t3)' }}>Altura registrada</div>
           </div>
 
-          <button
-            onClick={() => setStep(5)}
-            style={{
-              width: '100%', padding: 16, borderRadius: 12, border: 'none',
-              background: 'var(--green)', color: '#fff', cursor: 'pointer',
-              fontSize: 14, fontWeight: 600
-            }}
-          >
-            Continuar →
-          </button>
-        </div>
-      )}
-
-      {/* Step 5: Identificar especie */}
-      {step === 5 && (
-        <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
             Identificar especie
           </h2>
-          
-          <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 16 }}>
-            Usa Pl@ntNet para identificar la especie del arbol
+          <p style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 16 }}>
+            Usa Pl@ntNet o confirma la especie del arbol
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button
               onClick={handleIdentifySpecies}
               disabled={uploading}
-              style={{
-                padding: 16, borderRadius: 12, border: 'none',
-                background: 'var(--green)', color: '#fff', cursor: 'pointer',
-                fontSize: 14, fontWeight: 600, opacity: uploading ? 0.7 : 1
-              }}
+              style={{ ...btnPrimary, opacity: uploading ? 0.7 : 1 }}
             >
               {uploading ? 'Identificando...' : '🌿 Identificar con Pl@ntNet'}
             </button>
@@ -503,74 +730,95 @@ export default function TreeCapture({ trees, onCaptureComplete }) {
                   confidence: 100,
                   source: 'manual'
                 });
-                setStep(6);
+                setStep(5);
               }}
-              style={{
-                padding: 16, borderRadius: 12, border: '1px solid var(--border)',
-                background: '#fff', cursor: 'pointer', fontSize: 14
-              }}
+              style={btnSecondary}
             >
-              ✏️ Seleccionar Manualmente
+              Usar especie del arbol: {selectedTree?.species}
             </button>
           </div>
         </div>
       )}
 
-      {/* Step 6: Resultado especie */}
-      {step === 6 && speciesResult && (
+      {/* Step 5: Confirmar y subir */}
+      {step === 5 && speciesResult && (
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            Especie identificada
+            Confirmar registro
           </h2>
-          
-          <div style={{
-            padding: 20, borderRadius: 12, background: '#f0fdf4',
-            border: '1px solid #bbf7d0', marginBottom: 16, textAlign: 'center'
+
+          <div style={{ 
+            display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 
           }}>
-            <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--green)' }}>
-              {speciesResult.species}
+            <div style={{
+              padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
+              display: 'flex', justifyContent: 'space-between'
+            }}>
+              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Arbol</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{selectedTree?.code}</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 4 }}>
-              Confianza: {speciesResult.confidence}%
+            <div style={{
+              padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
+              display: 'flex', justifyContent: 'space-between'
+            }}>
+              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Altura</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{measurement?.height_cm} cm</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>
-              Fuente: {speciesResult.source}
+            <div style={{
+              padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
+              display: 'flex', justifyContent: 'space-between'
+            }}>
+              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Especie</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{speciesResult.species}</span>
+            </div>
+            <div style={{
+              padding: '12px 14px', borderRadius: 10, background: 'var(--s2)',
+              display: 'flex', justifyContent: 'space-between'
+            }}>
+              <span style={{ fontSize: 12, color: 'var(--t3)' }}>Confianza</span>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{speciesResult.confidence}%</span>
             </div>
           </div>
 
           <button
             onClick={handleUpload}
             disabled={uploading}
+            style={{ ...btnPrimary, opacity: uploading ? 0.7 : 1 }}
+          >
+            {uploading ? 'Subiendo...' : '📤 Subir y Registrar'}
+          </button>
+
+          <button
+            onClick={() => setStep(4)}
             style={{
-              width: '100%', padding: 16, borderRadius: 12, border: 'none',
-              background: 'var(--green)', color: '#fff', cursor: 'pointer',
-              fontSize: 14, fontWeight: 600, opacity: uploading ? 0.7 : 1
+              marginTop: 12, padding: 12, borderRadius: 8, border: 'none',
+              background: 'transparent', color: 'var(--t3)', cursor: 'pointer',
+              fontSize: 13, width: '100%'
             }}
           >
-            {uploading ? 'Subiendo...' : '📤 Subir Foto y Registrar'}
+            ← Cambiar especie
           </button>
         </div>
       )}
 
-      {/* Step 7: Completado */}
-      {step === 7 && (
-        <div style={{ textAlign: 'center', padding: 40 }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
-          <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
-            Registro completado
+      {/* Step 6: Completado */}
+      {step === 6 && (
+        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: 20, background: '#dcfce7',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px', fontSize: 36
+          }}>
+            ✅
+          </div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+            Registro exitoso
           </h2>
-          <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 24 }}>
-            La foto y datos del arbol {selectedTree?.code} han sido guardados
+          <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 24, lineHeight: 1.5 }}>
+            Foto y datos del arbol <strong>{selectedTree?.code}</strong> guardados correctamente
           </p>
           
-          <button
-            onClick={handleReset}
-            style={{
-              padding: 16, borderRadius: 12, border: 'none',
-              background: 'var(--green)', color: '#fff', cursor: 'pointer',
-              fontSize: 14, fontWeight: 600
-            }}
-          >
+          <button onClick={handleReset} style={btnPrimary}>
             Capturar otro arbol
           </button>
         </div>

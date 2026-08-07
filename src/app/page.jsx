@@ -9,6 +9,7 @@ const Map = dynamic(() => import('@/components/Map'), { ssr: false });
 export default function HomePage() {
   const [trees, setTrees] = useState([]);
   const [stats, setStats] = useState(null);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
   useEffect(() => {
     fetch('/api/trees').then(r => r.json()).then(setTrees);
@@ -41,7 +42,7 @@ export default function HomePage() {
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {stats && (
-          <aside className="sidebar" style={{ width: 260 }}>
+          <aside className={`sidebar ${sidebarExpanded ? 'expanded' : ''}`} style={{ width: 260 }}>
             <div className="sidebar-section">
               <div className="sidebar-title">RESUMEN</div>
               <div className="stat-block">
@@ -81,6 +82,13 @@ export default function HomePage() {
                 + Registrar arbol
               </Link>
             </div>
+
+            <button 
+              className="sidebar-toggle"
+              onClick={() => setSidebarExpanded(!sidebarExpanded)}
+            >
+              {sidebarExpanded ? '▲ Menos' : '▼ Mas'}
+            </button>
           </aside>
         )}
 

@@ -330,14 +330,33 @@ tr[data-clickable]:hover { background: var(--s2); }
     border-right: none;
     border-bottom: 1px solid var(--border);
     padding: 12px 16px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    display: flex;
-    gap: 8px;
+    max-height: 60px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .sidebar.expanded {
+    max-height: 400px;
+    overflow-y: auto;
   }
 
   .sidebar-section { margin-bottom: 0; }
   .sidebar-title { display: none; }
+
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 8px;
+    border: none;
+    background: var(--s3);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--t2);
+    margin-top: 8px;
+  }
 
   .form-row {
     grid-template-columns: 1fr;
