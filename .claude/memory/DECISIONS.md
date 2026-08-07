@@ -114,3 +114,117 @@ Consecuencia:
 - Revisar periodicamente con `npm audit`.
 
 Estado: Cerrada.
+
+## DEC-005 — UI/UX captura: dropdowns en lugar de inputs manuales
+
+Fecha: 2026-08-07
+
+Decision:
+
+El formulario de captura TreeCapture usara selects/dropdowns para especie, zona y salud en lugar de inputs de texto manuales.
+
+Razon:
+
+- Los alumnos capturan rapido con opciones predefinidas.
+- Reduce errores de escritura (especies mal escritas, zonas inconsistentes).
+- Mejora la experiencia en movil (tap en vez de escribir).
+
+Trade-offs:
+
+- A favor: mas rapido, menos errores, mejor UX movil.
+- En contra: requiere mantenimiento de listas de opciones.
+
+Estado: Cerrada.
+
+## DEC-006 — PWA basica: manifest + service worker
+
+Fecha: 2026-08-07
+
+Decision:
+
+ForestData tendra una PWA basica con manifest.json y service worker para la pagina /capturar.
+
+Razon:
+
+- Permite instalacion en pantalla de inicio movil.
+- Mejora la experiencia de uso en campo.
+- Service worker permite cache basico.
+
+Trade-offs:
+
+- A favor: expericia de app nativa, funciona sin conexión posterior.
+- En contra: requiere generacion de iconos y configuracion de offline.
+
+Estado: Cerrada.
+
+## DEC-007 — Sidebar colapsable en movil
+
+Fecha: 2026-08-07
+
+Decision:
+
+El sidebar de navegacion sera colapsable en movil con boton toggle "Mas".
+
+Razon:
+
+- En pantallas pequenas el sidebar ocupa mucho espacio.
+- Los usuarios movil necesitan acceso rapido a navegacion sin scroll.
+
+Trade-offs:
+
+- A favor: mejor uso del espacio en movil.
+- En contra: requiere JS adicional para toggle.
+
+Estado: Cerrada.
+
+## DEC-008 — Iconografia Lucide (sin emojis)
+
+Fecha: 2026-08-07
+
+Decision:
+
+Todo el codigo fuente usara iconos Lucide React (`lucide-react`) en lugar de emojis.
+
+Razon:
+
+- Los emojis no se renderizan consistentemente entre dispositivos.
+- Lucide provides icons SVG consistentes y personalizables.
+- Mejora la accesibilidad y el control visual.
+
+Trade-offs:
+
+- A favor: consistencia visual, mejor accesibilidad, control de tamano y color.
+- En contra: requiere importar componentes individuales.
+
+Consecuencia:
+
+- Todos los archivos .jsx/.tsx deben usar lucide-react.
+- Se agrego regla a CLAUDE.md.
+
+Estado: Cerrada.
+
+## DEC-009 — Prueba ArUco impresa pospuesta
+
+Fecha: 2026-08-07
+
+Decision:
+
+La prueba de medicion con regla ArUco impresa se pospone hasta nuevo aviso.
+
+Razon:
+
+1. No se dispone de impresora en este momento.
+2. Las pruebas en movil se realizan con conexion de uso medido (compartiendo datos desde el movil).
+3. La funcionalidad de medicion esta implementada y lista para probarse cuando las condiciones lo permitan.
+
+Trade-offs:
+
+- A favor: no bloquea otras fases, evita consumo innecesario de datos moviles.
+- En contra: no se puede verificar la precision de la medicion ArUco.
+
+Consecuencia:
+
+- La regla generada (assets/regla_aruco_30cm.png) estara lista para cuando se tenga acceso a impresora.
+- La medicion ArUco queda como funcionalidad implementada pero no verificada en campo.
+
+Estado: Cerrada.

@@ -12,3 +12,6 @@
 - En Next.js 14 App Router, `params` en page components es un objeto synchronous, no un Promise. No usar `use()` de React 19. En Next.js 15+ si es Promise.
 - El skill impeccable requiere PRODUCT.md antes de cualquier comando de diseno. Ejecutar init primero, luego document para DESIGN.md, y despues polis/craft/audit.
 - Los select inputs en CSS necesitan appearance: none + background-image SVG custom para flecha. El default de browser no respeta border-radius ni padding consistente.
+- Lucide React es la libreria de iconografia para todo el proyecto. No usar emojis en codigo fuente. Los emojis no son consistentes entre dispositivos y no se pueden personalizar (tamano, color, peso).
+- Cuando se trabaja con pruebas en movil con conexion de uso medido, evitar descargas grandes y pruebas que consuman mucho ancho de banda. Priorizar funcionalidad offline sobre pruebas de conectividad.
+- La documentacion del proyecto debe reflejar el estado real, no el estado aspiracional. Actualizar README, roadmap y contexto con lo que realmente esta implementado, no con lo que se planea hacer.
